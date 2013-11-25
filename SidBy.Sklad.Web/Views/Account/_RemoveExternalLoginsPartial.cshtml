@@ -1,0 +1,35 @@
+﻿@model ICollection<SidBy.Sklad.Web.Models.ExternalLogin>
+@using SidBy.Sklad.Web.Resources.Views.Account
+
+@if (Model.Count > 0)
+{
+    <h3>@_RemoveExternalLoginsPartialStrings.RegisteredExternalLogins</h3>
+    <table>
+        <tbody>
+        @foreach (SidBy.Sklad.Web.Models.ExternalLogin externalLogin in Model)
+        {
+            <tr>
+                <td>@externalLogin.ProviderDisplayName</td>
+                <td>
+                    @if (ViewBag.ShowRemoveButton)
+                    {
+                        using (Html.BeginForm("Disassociate", "Account"))
+                        {
+                            @Html.AntiForgeryToken()
+                            <div>
+                                @Html.Hidden("provider", externalLogin.Provider)
+                                @Html.Hidden("providerUserId", externalLogin.ProviderUserId)
+                                <input type="submit" value="@_RemoveExternalLoginsPartialStrings.Remove" title="@String.Format(_RemoveExternalLoginsPartialStrings.RemoveCredentialFromYourAccount, @externalLogin.ProviderDisplayName)" />
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        @: &nbsp;
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,7 @@
+D:\codearound\Sklad\SidBy.Common\bin\Debug\SidBy.Common.dll
+D:\codearound\Sklad\SidBy.Common\bin\Debug\SidBy.Common.pdb
+D:\codearound\Sklad\SidBy.Common\bin\Debug\libphonenumber-csharp-portable.dll
+D:\codearound\Sklad\SidBy.Common\bin\Debug\libphonenumber-csharp-portable.pdb
+D:\codearound\Sklad\SidBy.Common\obj\Debug\SidBy.Common.csprojResolveAssemblyReference.cache
+D:\codearound\Sklad\SidBy.Common\obj\Debug\SidBy.Common.dll
+D:\codearound\Sklad\SidBy.Common\obj\Debug\SidBy.Common.pdb
