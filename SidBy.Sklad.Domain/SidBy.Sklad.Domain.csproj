@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -39,8 +40,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Contract.cs" />
+    <Compile Include="Document.cs" />
+    <Compile Include="DocumentCounter.cs" />
+    <Compile Include="DocumentType.cs" />
+    <Compile Include="Enums\EntityEnum.cs" />
+    <Compile Include="Enums\TemplateEnum.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="Models\ContractorCodeIdModel.cs" />
+    <Compile Include="Models\ContractorGridSimpleModel.cs" />
+    <Compile Include="Models\SalesReportContractorGridModel.cs" />
+    <Compile Include="Models\SalesReportContractorModel.cs" />
+    <Compile Include="Models\SalesReportDataModel.cs" />
+    <Compile Include="Models\SalesReportModel.cs" />
+    <Compile Include="Models\SalesReportModelItem.cs" />
+    <Compile Include="Models\SalesReportPeriodModel.cs" />
+    <Compile Include="Product.cs" />
+    <Compile Include="ProductLine.cs" />
+    <Compile Include="_Contact.cs" />
+    <Compile Include="ContactType.cs" />
+    <Compile Include="Contractor.cs" />
+    <Compile Include="ContractorTag.cs" />
+    <Compile Include="ContractorType.cs" />
+    <Compile Include="LegalEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Region.cs" />
+    <Compile Include="UserProfile.cs" />
+    <Compile Include="Warehouse.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

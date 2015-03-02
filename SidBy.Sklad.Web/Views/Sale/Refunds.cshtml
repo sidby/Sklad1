@@ -1,0 +1,211 @@
+﻿@model SidBy.Sklad.Web.Models.SkladJqGridModel
+@using SidBy.Sklad.Web.Models
+@using Trirand.Web.Mvc
+
+<table>
+    <tr>
+        <td><div class="sklad-title">Возврат на дату:</div></td>
+        <td><input name="refundsReportDate" id="refundsReportDate" style="width:120px;display:inline;" /></td>
+        <td><div class="sklad-title">Клиент:</div></td>
+        <td><input name="refundsReportContractorCode" id="refundsReportContractorCode" style="width:120px;display:inline;" />
+            <input type="hidden" value="0" name="refundsReportContractorId" id="refundsReportContractorId" />
+            <span class="refundsClientNameContainer" style="display:none;">
+                <span class="refundsClientName"></span>
+            <button id="refundsClientRemove">X</button></span>
+        </td>
+        <td><div class="sklad-title">Менеджер:</div></td>
+        <td>
+            <input name="refundsReportManager" id="refundsReportManager" style="width:120px;display:inline;" />
+            <input type="hidden" value="0" name="refundsReportManagerId" id="refundsReportManagerId" />
+            <span class="refundsManagerContainer" style="display:none;">
+                <span class="refundsManagerName"></span>
+                <button id="refundsManagerRemove">X</button>
+            </span>
+        </td>
+        <td><button id="btnExportToExcelRefundsByDay">Экспорт в Excel</button></td>
+    </tr>
+</table>
+
+@*Grid с возвратами за определённый день*@ 
+@Html.Trirand().JQGrid(ViewBag.GridProducts, "RefundsProductGrid1")
+
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        $("#RefundsProductGrid1").hide();
+  
+        $("#btnExportToExcelRefundsByDay").button().click(function () {
+            var date = $("#refundsReportDate").datepicker("getDate").toJSONLocal();
+       
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetRefundsReportFileLink", "Sale")",
+                      success: function (data) {
+                          // redirect to url
+                          window.location.replace(data);
+                      },
+                      data: {
+                          "refundsReportDate": $("#refundsReportDate").datepicker("getDate").toJSONLocal(),
+                          "contractorId": $("#refundsReportContractorId").val(),
+                          "managerId": $("#refundsReportManagerId").val(),
+                      }
+                });
+            });
+
+        $("#refundsReportDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            dateFormat: 'dd.mm.yy',
+            defaultDate: new Date(),
+            onClose: function (dateText, inst) {
+                $("#RefundsProductGrid1").show();
+
+                if ($(this).datepicker("getDate")) {
+                    jQuery("#RefundsProductGrid1")
+                        .setGridParam({
+                            postData: {
+                                refundsReportDate: $(this).datepicker("getDate").toJSONLocal(),
+                                contractorId: $("#refundsReportContractorId").val(),
+                                managerId: $("#refundsReportManagerId").val(),
+                            }
+                        })
+                        .trigger("reloadGrid");
+                }
+            }
+        });
+        $("#refundsReportDate").datepicker('setDate', new Date());
+
+        // empty filter by client
+        $("#refundsClientRemove").button().click(function () {
+            $(".refundsClientNameContainer").hide();
+            $("#refundsReportContractorId").val(0);
+            $(".refundsClientName").text('');
+            $("#refundsReportContractorCode").val('');
+            if ($("#refundsReportDate").datepicker("getDate")) {
+                jQuery("#RefundsProductGrid1")
+                       .setGridParam({
+                           postData: {
+                               refundsReportDate: $("#refundsReportDate").datepicker("getDate").toJSONLocal(),
+                               contractorId: $("#refundsReportContractorId").val(),
+                               managerId: $("#refundsReportManagerId").val(),
+                           }
+                       })
+                       .trigger("reloadGrid");
+            }
+        });
+
+        $("#refundsReportContractorCode").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("GetClientByCode", "Reference")",
+                    data: { term: request.term, count: 20 },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                processdata: true,
+                async: true,
+                cache: false,
+                success: function (data) {
+                    response(data);
+                },
+            })
+        },
+        minLength: 2,
+        select: function (event, ui) {
+            var text = "";
+            $(".refundsClientName").text(text + ui.item.Name + " (" + ui.item.Code + ")");
+            $("#refundsReportContractorId").val(ui.item.ContractorId);
+            $(".refundsClientNameContainer").show();
+            $("#refundsReportContractorCode").val(ui.item.Code);
+            if ($("#refundsReportDate").datepicker("getDate")) {
+                jQuery("#RefundsProductGrid1")
+                       .setGridParam({
+                           postData: {
+                               refundsReportDate: $("#refundsReportDate").datepicker("getDate").toJSONLocal(),
+                               contractorId: $("#refundsReportContractorId").val(),
+                               managerId: $("#refundsReportManagerId").val(),
+                           }
+                       })
+                       .trigger("reloadGrid");
+            }
+            return false;
+        }
+        }).data("ui-autocomplete")._renderItem = function (ul, item) {
+            return $("<li>")
+            .append("<a>" + item.Code + "</a>")
+            .appendTo(ul);
+        };
+
+        
+        // empty filter by manager
+        $("#refundsManagerRemove").button().click(function () {
+            $(".refundsManagerContainer").hide();
+            $("#refundsReportManagerId").val(0);
+            $(".refundsManagerName").text('');
+            $("#refundsReportManager").val('');
+            if ($("#refundsReportDate").datepicker("getDate")) {
+                jQuery("#RefundsProductGrid1")
+                       .setGridParam({
+                           postData: {
+                               refundsReportDate: $("#refundsReportDate").datepicker("getDate").toJSONLocal(),
+                               contractorId: $("#refundsReportContractorId").val(),
+                               managerId: $("#refundsReportManagerId").val(),
+                           }
+                       })
+                       .trigger("reloadGrid");
+            }
+        });
+
+        $("#refundsReportManager").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("GetManagerByDisplayName", "MyCompany")",
+                    data: { term: request.term, count: 20 },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                processdata: true,
+                async: true,
+                cache: false,
+                success: function (data) {
+                    response(data);
+                },
+                })
+            },
+                minLength: 2,
+            select: function (event, ui) {
+                var text = "";
+                $(".refundsManagerName").text(text + ui.item.DisplayName);
+                $("#refundsReportManagerId").val(ui.item.UserId);
+                $(".refundsManagerContainer").show();
+                $("#refundsReportManager").val(ui.item.DisplayName);
+                if ($("#refundsReportDate").datepicker("getDate")) {
+                    jQuery("#RefundsProductGrid1")
+                           .setGridParam({
+                               postData: {
+                                   refundsReportDate: $("#refundsReportDate").datepicker("getDate").toJSONLocal(),
+                                   contractorId: $("#refundsReportContractorId").val(),
+                                   managerId: $("#refundsReportManagerId").val(),
+                               }
+                           })
+                           .trigger("reloadGrid");
+                }
+                return false;
+            }
+            }).data("ui-autocomplete")._renderItem = function (ul, item) {
+                return $("<li>")
+                .append("<a>" + item.DisplayName + "</a>")
+                .appendTo(ul);
+            };
+    });
+</script>
+
+@Html.Partial("_JqGridDocumentPartial", new JqGridViewDocParamsModel()
+{
+    Grid = Model.DocumentGrid,
+    GridId = "RefundsGrid1",
+    Title = @ViewBag.Title,
+    DocumentTypeId =
+        (int)SidBy.Sklad.Domain.Enums.EntityEnum.DocumentTypeEnum.Refunds,
+    ShowContractor = false
+})

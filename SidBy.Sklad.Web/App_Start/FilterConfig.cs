@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using SidBy.Sklad.Web.Filters;
+using System.Web;
 using System.Web.Mvc;
 
 namespace SidBy.Sklad.Web
@@ -7,6 +8,7 @@ namespace SidBy.Sklad.Web
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
+            filters.Add(new InitializeSimpleMembershipAttribute());
             filters.Add(new HandleErrorAttribute());
         }
     }

@@ -1,0 +1,131 @@
+﻿@model int
+<p>
+    <span class="SupplierName">Код фабрики</span>
+     <input type="text" id="ContractorCode" style="width:120px;" name="ContractorCode" />
+<input type="hidden" id="SupplierId" name="SupplierId" />
+<span class="article">Артикул
+<input type="text" id="Article" style="width:120px;" name="Article" /></span>
+ <span id="searchProductUrls"></span>
+</p>
+
+
+
+<script>
+    $(document).ready(function () {
+        $("#Article").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("GetProductByArticle", "Home")",
+                    data: {
+                        term: request.term,
+                        supplierId: $("#SupplierId").val(),
+                        count: 20
+                    },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    processdata: true,
+                    async: true,
+                    cache: false,
+                    success: function (data) {
+                        response(data);
+                    },
+                })
+            },
+            minLength: 2,
+            select: function (event, ui) {
+                // get related documents of this
+                // product by supplierId and ui.item.Article
+                $('#Article').val(ui.item.Article);
+                if (ui.item.ProductId)
+                {
+                    $.ajax({
+                        type: "GET",
+                        url: "@Url.Action("GetDocumentsByProduct", "Home", new { documentTypeId = Model })",
+                        data: {
+                            productId: ui.item.ProductId,
+                         
+                            count: 100
+                        },
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        processdata: true,
+                        async: true,
+                        cache: false,
+                        success: function (data) {
+                            $('#searchProductUrls').html('');
+                            if (data) {
+                                if (data.length > 0) {
+                                    $.each(data, function (index, value) {
+                                        var docDate = new Date(parseInt(value.CreatedOf.substr(6)));
+                                        $('#searchProductUrls')
+                                            .append('<a class="' + (value.IsCommitted ? "commited" : "not-commited") +
+                                            '" target="_blank" href="@Url.Content("~/Home/Document")?documentId=' +
+                                            value.DocumentId + '">' +
+                                            getDocumentTypeTitle(value.DocumentTypeId) + ' №' + value.Number + ' от ' +
+                                            //("0" + this.getDate()).slice(-2)
+                                            +("0" + docDate.getDate()).slice(-2) + '.' 
+                                            + ("0" + (docDate.getMonth() + 1)).slice(-2) + '.' + docDate.getFullYear() + '</a> ');
+
+                                        /*
+                                        u.DocumentId, 
+                              u.Document.IsCommitted, u.Document.Number,
+                              u.Document.DocumentTypeId,
+                              u.Document.CreatedOf,
+                                        */
+                                    });
+                                }
+                                else {
+                                    $('#searchProductUrls').html('Данный товар не найден ни в одном документе');
+                                }
+                            }
+                            else {
+                                $('#searchProductUrls').html('Уточните поиск. Товар не найден!');
+                            }
+
+                           // console.log(data);
+                        },
+                    })
+                }
+
+                return false;
+            }
+        }).data("ui-autocomplete")._renderItem = function (ul, item) {
+            return $("<li>")
+            .append("<a>" + item.Article + "</a>")
+            .appendTo(ul);
+            //"<br>" + item.Name + item.SurName + 
+        };
+
+        $("#ContractorCode").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("GetSupplierByCode", "Reference")",
+                    data: { term: request.term, count: 20 },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    processdata: true,
+                    async: true,
+                    cache: false,
+                    success: function (data) {
+                        response(data);
+                    },
+                })
+            },
+            minLength: 2,
+            select: function (event, ui) {
+                var text = "Товар от фабрики: ";
+                $(".SupplierName").text(text + ui.item.Name + " (" + ui.item.Code + ")");
+                $("#SupplierId").val(ui.item.ContractorId);
+                $("#ContractorCode").val(ui.item.Code);
+                $("#ProductFields").css('visibility', 'visible').hide().fadeIn('slow');;
+                return false;
+            }
+        }).data("ui-autocomplete")._renderItem = function (ul, item) {
+            return $("<li>")
+            .append("<a>" + item.Code + "</a>")
+            .appendTo(ul);
+        };
+    });
+ </script>

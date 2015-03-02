@@ -1,0 +1,18 @@
+﻿@model SidBy.Sklad.Web.Models.SkladJqGridModel
+@using SidBy.Sklad.Web.Models
+@using Trirand.Web.Mvc
+
+@Html.Partial("_JqGridStandart", new JqGridViewParamsModel() { 
+    Grid = Model.ContractorGrid, GridId = "ContractorGrid1", Title = @ViewBag.Title})
+
+<script type="text/javascript">
+    function formatContactsLink(cellvalue, options, rowObject) {
+       // console.log(rowObject);
+        return '<ul class="grid-ui-icons"><li><a href="/MyCompany/ContactList?contractorId='
+            + cellvalue + '" title="Контакты"><span class="ui-icon ui-icon-contact"></span></a></li> <li><a href="/MyCompany/ContractorDetails?contractorId='
+        + cellvalue + '" title="Информация"><span class="ui-icon ui-icon-info"></span></a></li></ul>';
+    }
+    function unFormatContactsLink(cellvalue, options, cell) {
+        return $('img', cell).attr('src');
+    }
+</script>

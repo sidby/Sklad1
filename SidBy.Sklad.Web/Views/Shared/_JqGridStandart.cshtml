@@ -1,0 +1,31 @@
+﻿@model SidBy.Sklad.Web.Models.JqGridViewParamsModel
+@using Trirand.Web.Mvc
+
+<script type="text/javascript">
+    $(function () {
+        $("#@(Model.GridId + "_" + "btnContractorAdd")").button({
+            icons: {
+                primary: "ui-icon-plus"
+            }
+        }).on("click", function (event) {
+            $("#@Model.GridId").jqGrid('editGridRow', "new", {
+                rowID: "new_row",
+                initdata: {},
+                position: "first",
+                useDefValues: false,
+                useFormatter: false,
+                addRowParams: { extraparam: {} },
+                width: 450
+            });
+        });
+    });
+</script>
+
+<table class="sklad-top-menu">
+    <tr>
+        <td><div class="sklad-title">@Model.Title</div></td>
+        <td><button id="@(Model.GridId + "_" + "btnContractorAdd")">Создать</button></td>
+    </tr>
+</table>
+
+@Html.Trirand().JQGrid(Model.Grid, Model.GridId)

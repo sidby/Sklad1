@@ -1,0 +1,34 @@
+﻿@model SidBy.Sklad.Web.Models.LogJqGridModel
+@using Trirand.Web.Mvc
+
+<h3>Лог событий</h3>
+@Html.Trirand().JQGrid(Model.LogGrid, "Log1")
+
+@Html.Trirand().JQDatePicker(new JQDatePicker { 
+    MaxDate = DateTime.Now,
+    MinDate = new DateTime(2014,1,1),
+    DisplayMode = DatePickerDisplayMode.ControlEditor,
+    ShowOn = ShowOn.Focus,
+    OnSelectedCallbackFunction = "LogCreatedPickerDateSelectedTrigger",
+}, "LogCreatedPicker")
+
+<script type="text/javascript">
+    function LogCreatedPickerDateSelectedTrigger(dateText, inst)
+    {
+        var sgrid = $("#Log1")[0];
+        sgrid.triggerToolbar();
+    }
+
+    //function OrderByDateCreated(data)
+    //{
+    //    //if (data.nodeType) {
+    //        setTimeout(function () {
+    //            var sgrid = $("#Log1");
+    //            sgrid.sortGrid('Date');
+    //            sgrid.trigger("reloadGrid");
+    //        }, 10000);
+    //    //}
+    //    console.log(data);
+    //}
+</script>
+

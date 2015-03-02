@@ -1,0 +1,724 @@
+﻿@model SidBy.Sklad.Web.Models.IndicatorsModel
+@using SidBy.Sklad.Web
+@using SidBy.Sklad.Domain.Enums
+
+@{
+    ViewBag.Title = "Показатели";
+
+        string appPath = Request.Url.GetLeftPart(UriPartial.Authority) + Request.ApplicationPath;
+        string contractorDetailsPath = appPath + "MyCompany/ContractorDetails";
+    
+}
+
+<hgroup class="title">
+    <h1>@ViewBag.Title.</h1>
+    <h2>@ViewBag.Message</h2>
+</hgroup>
+
+<div>
+    <label style="display:inline;" for="monthReportFromDate">Отчёт за месяц</label>
+    <input name="monthReportFromDate" id="monthReportFromDate" style="width:80px;display:inline;" class="date-picker" />
+
+    @{
+        int userId = WebSecurity.CurrentUserId;
+        
+        string[] roles = Roles.GetRolesForUser(WebSecurity.CurrentUserName);
+        
+        List<SelectListItem> employeesToSelectList = (Model.Employees.ToSelectListItems(
+        m => m.DisplayName,
+        m => m.UserId.ToString(),
+        m => m.UserId == userId).ToList<SelectListItem>());
+        if (!roles.Contains("limitedemployee")) { 
+            employeesToSelectList.Add(new SelectListItem { Selected = false, Text = "По всем", Value = "-1" });
+        }
+        }
+
+    @Html.DropDownListFor(m => userId, employeesToSelectList, new { @id = "employeesMonthReport" })
+        <button id="printMonthReport">Печать отчёта</button>
+    <div id="monthReportContainer" class="reportcontainer"></div>
+  
+    <script id="reportFormTemplate" type="text/x-jsrender">
+        <table border="0" class="report_table" >
+            <thead>
+                <tr>
+                    <th>Числа отгрузок</th>
+                    {{for Periods ~periodFlag = PeriodFlag  }}
+                    <th colspan="2" rowspan="2">{{>~getDate(Period,~periodFlag)}} </th>
+                    {{/for}}
+                    <th colspan="2" rowspan="2">Возврат</th>
+                    <th colspan="2" rowspan="2">Итого</th>
+                </tr>
+                <tr>
+                    <th>Клиенты</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{for ReportModel ~periods=Periods  }}
+                <tr class="{{:#index%2 ? 'even' : 'odd'}}">
+                    <td rowspan="4">
+                        <a target="_blank" href="@contractorDetailsPath?contractorId={{>ContractorModel.ContractorId}}">{{>ContractorModel.ContractorCode}}</a>
+                    </td>
+                </tr>
+                {{:~getReportData(~getTdDataCell,#index%2,~periods,ReportItems,Refunds,SubTotalProfit)}}
+                {{/for}}
+                <tr>
+                    <td rowspan="4">
+                        ИТОГО
+                    </td>
+                </tr>
+                <tr>
+                    {{for Periods }}
+                    <td>наша</td>
+                    <td>{{>ReportItem.PurchaseSum}}</td>
+                    {{/for}}
+                    <td>наша</td>
+                    <td>{{>RefundsGrandTotal.PurchaseSum}}</td>
+                    <td>наша</td>
+                    <td>{{>~formatValue(GrandTotal.PurchaseSum-RefundsGrandTotal.PurchaseSum)}}</td>
+                </tr>
+                <tr>
+                    {{for Periods }}
+                    <td>продажа</td>
+                    <td>{{>ReportItem.SaleSum}}</td>
+                    {{/for}}
+
+                    <td>продажа</td>
+                    <td>{{>RefundsGrandTotal.SaleSum}}</td>
+                    <td>продажа</td>
+                    <td>{{>~formatValue(GrandTotal.SaleSum-RefundsGrandTotal.SaleSum)}}</td>
+                </tr>
+                <tr>
+                    {{for Periods }}
+                    <td>разница</td>
+                    <td>{{>ReportItem.Profit}}</td>
+                    {{/for}}
+                    <td>разница</td>
+                    <td>{{>RefundsGrandTotal.Profit}}</td>
+                    <td>разница</td>
+                    <td>{{>~formatValue(GrandTotal.Profit-RefundsGrandTotal.Profit)}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </script>
+
+    <script id="reportContractorFormTemplate" type="text/x-jsrender">
+        <table border="0" class="report_table" id="contractor_report_table" name="contractor_report_table">
+            <thead>
+                <tr>
+                    <th rowspan="2">Фабрика/Клиент</th>
+                    <th colspan="2">Итого</th>
+                    {{for Clients ~periodFrom=SelectedPeriodFrom ~periodTo=SelectedPeriodTo }}
+
+                    <th colspan="2"><a href="@contractorDetailsPath?contractorId={{>ContractorId}}&periodFrom={{>~periodFrom}}&periodTo={{>~periodTo}}">{{>Code}}</a>  ({{>Region}})</th>
+
+                    {{/for}}
+                    <th colspan="2">Итого</th>
+                    <th rowspan="2">Фабрика/Клиент</th>
+                </tr>
+                <tr>
+                    <th>отгруз<br>ка</th>
+                    <th>возвр<br>ат</th>
+                    {{for Clients }}
+                    <th>отгруз<br>ка</th>
+                    <th>возвр<br>ат</th>
+                    {{/for}}
+                    <th>отгруз<br>ка</th>
+                    <th>возвр<br>ат</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>ИТОГИ</td>
+                    <td>{{>~formatValue(ShipmentQuantityGrandTotal)}} </td>
+                    <td>{{>~formatValue(RefundsQuantityGrandTotal)}}</td>
+                    {{for Clients ~data=Data }}
+                    {{:~getSubTotalByContractor(~formatValue, ~data, ContractorId,true)}}
+                    {{/for}}
+                    <td>{{>~formatValue(ShipmentQuantityGrandTotal)}} </td>
+                    <td>{{>~formatValue(RefundsQuantityGrandTotal)}}</td>
+                    <td>ИТОГИ</td>
+                </tr>
+                {{for Factories ~data=Data ~clients=Clients ~periodFrom=SelectedPeriodFrom ~periodTo=SelectedPeriodTo}}
+
+                <tr class="{{:#index%2 ? 'even' : 'odd'}}">
+                    <td><a target="_blank" href="@contractorDetailsPath?contractorId={{>ContractorId}}&periodFrom={{>~periodFrom}}&periodTo={{>~periodTo}}">{{>Code}}</a> ({{>Region}})</td>
+                    {{:~getSubTotalByContractor(~formatValue,~data, ContractorId,false)}}
+                    {{for ~clients ~factoryId=ContractorId}}
+                    {{:~getReportData(~formatValue,~data,~factoryId, ContractorId, ~grandTotalRefunds)}}
+
+                    {{/for}}
+                    {{:~getSubTotalByContractor(~formatValue,~data, ContractorId,false)}}
+
+                    <td><a target="_blank" href="@contractorDetailsPath?contractorId={{>ContractorId}}&periodFrom={{>~periodFrom}}&periodTo={{>~periodTo}}">{{>Code}}</a> ({{>Region}})</td>
+                </tr>
+
+                {{/for}}
+                <tr>
+                    <td>ИТОГИ</td>
+               
+                    <td>{{>~formatValue(ShipmentQuantityGrandTotal)}} </td>
+                    <td>{{>~formatValue(RefundsQuantityGrandTotal)}}</td>
+          
+                    {{for Clients ~data=Data }}
+                    {{:~getSubTotalByContractor(~formatValue, ~data, ContractorId,true)}}
+                    {{/for}}
+                    <td>{{>~formatValue(ShipmentQuantityGrandTotal)}} </td>
+                    <td>{{>~formatValue(RefundsQuantityGrandTotal)}}</td>
+                    <td>ИТОГИ</td>
+                </tr>
+                <tr>
+                    <td rowspan="2">Фабрика/Клиент</td>
+                    <td>отгруз<br>ка</td>
+                    <td>возвр<br>ат</td>
+                    {{for Clients }}
+                    <td>отгруз<br>ка</td>
+                    <td>возвр<br>ат</td>
+                    {{/for}}
+                    <td>отгруз<br>ка</td>
+                    <td>возвр<br>ат</td>
+                    <td rowspan="2">Фабрика/Клиент</td>
+                </tr>
+                <tr>
+                    <th colspan="2">Итого</th>
+                    {{for Clients }}
+                    <td colspan="2"><a target="_blank" href="@contractorDetailsPath?contractorId={{>ContractorId}}">{{>Code}}</a>  ({{>Region}})</td>
+                    {{/for}}
+                    <td colspan="2">Итого</td>
+                </tr>
+            </tbody>
+        </table>
+    </script>
+
+    <label style="display:inline;" for="halfYearReportFromDate">Отчёт за сезон</label>
+ 
+    <input name="halfYearReportFromDate" id="halfYearReportFromDate" style="width:80px;display:inline;" class="date-picker" />
+    <input name="halfYearReportToDate" id="halfYearReportToDate" style="width:80px;display:inline;" class="date-picker" />
+      @Html.DropDownListFor(m => userId, employeesToSelectList, new { @id = "employeesHalfYearReport" })
+        <button id="printHalfYearReport">Печать отчёта</button>
+    
+    <div id="halfYearReportContainer" class="employeesToSelectList"></div>
+
+    <label style="display:inline;" for="contractorReportFromDate">Статистика по контрагентам</label>
+
+    <input name="contractorReportFromDate" id="contractorReportFromDate" style="width:80px;display:inline;" class="date-picker" />
+    <input name="contractorReportToDate" id="contractorReportToDate" style="width:80px;display:inline;" class="date-picker" />
+    
+    @{
+
+        List<SelectListItem> managersToSelectList = new List<SelectListItem>();
+
+        if (!roles.Contains("limitedemployee"))
+        {
+            managersToSelectList.Add(new SelectListItem { Selected = true, Text = "По всем", Value = "-1" });
+        }
+        
+        managersToSelectList.AddRange(Model.Managers.ToSelectListItems(
+        m => m.DisplayName,
+        m => m.UserId.ToString(),
+        m => false).ToList<SelectListItem>());
+    }
+    @*Dropdown to choose responsible person for factory*@
+    <label style="display:inline;" for="managersContractorsReport">Отв. за фабрику:</label>
+    @Html.DropDownListFor(m => userId, managersToSelectList, new { @id = "managersContractorReport" })
+    <button id="printContractorReport">Экспорт в Excel</button>
+    <button id="loadContractorReport">Загрузить отчёт</button>
+
+    <div id="contractorReportContainer" class="reportcontainer"></div>
+</div>
+@{ if (!roles.Contains("limitedemployee")) { 
+       @Html.Partial("_Log", Model.LogGrid)
+   }
+}
+
+<script>
+    jQuery(document).ready(function () {
+        var tableToExcel = (function () {
+            var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+            return function (table, name) {
+                if (!table.nodeType) table = document.getElementById(table)
+                var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+                window.location.href = uri + base64(format(template, ctx))
+            }
+        })()
+
+        updateMonthReport();
+        updateHalfYearReport();
+
+        function formatDate(date) {
+            ("0" + date.getDate()).slice(-2) + '.' + ("0" + (date.getMonth() +1)).slice(-2) +
+            '.' + date.getFullYear();
+        }
+
+        function printDiv(containerId, title) {
+            var divToPrint = document.getElementById(containerId);
+            newWin = window.open("Печать отчёта c sid.by");
+            var date = new Date();
+            newWin.document.write('<html style="border:none;background-color:#fff;"><head><title>Печать отчёта c sid.by</title>');
+            //newWin.document.write('<link rel="stylesheet" href="@Url.Content("~/Content/Site.css")">');
+            newWin.document.write('</head><body background-color:#fff;">');
+            newWin.document.write('<style type="text/css">');
+          
+            newWin.document.write(' table {border-collapse: collapse;border-spacing: 0;} ');
+            newWin.document.write('.report_table tr.even {background-color: #DFEFFC;} ');
+            newWin.document.write('td, th {font-family: Trebuchet MS,Lucida Grande,verdana,arial;font-size: 12px;border: 1px solid #000;padding-left: 5px;padding-right: 5px;} ');
+           
+            newWin.document.write('tbody {page-break-after:always;} ');
+            newWin.document.write('</style>');
+            
+            newWin.document.write('<h1>' + title + '</h1>');
+            newWin.document.write(divToPrint.outerHTML);
+            newWin.document.write('<p style="font-size:small;">Отчёт распечатан в системе складского учёта (tr.sid.by) ' +
+                formatDate(date) + '</p>');
+            newWin.document.write('</body></html>');
+            //    d.getDate + '.' + (d.getMonth() + 1) + '.' + d.getFullYear() + '</p>');
+            newWin.print();
+            newWin.close();
+        }
+
+        $("#printMonthReport").button().click(function () {
+            var empl = $("#employeesMonthReport");
+            var emplId = empl.val();
+          
+            var emplText = (emplId <= 0) ? " всем сотрудникам " : " сотруднику " + empl.find(":selected").text();
+            var title = 'Отчёт за ' + $("#monthReportFromDate").val() +
+                ' по ' + emplText;
+
+            printDiv("monthReportContainer", title);
+        });
+
+        $("#printHalfYearReport").button().click(function () {
+            var empl = $("#employeesHalfYearReport");
+            var emplId = empl.val();
+
+            var emplText = (emplId <= 0) ? " всем сотрудникам " : " сотруднику " + empl.find(":selected").text();
+            var title = 'Отчёт с ' + $("#halfYearReportFromDate").val() + " по " + $("#halfYearReportToDate").val() +
+                ' по ' + emplText;
+
+            printDiv("halfYearReportContainer", title);
+        });
+
+        $("#printContractorReport").button().click(function () {
+            var title = 'Отчёт с ' + $("#contractorReportFromDate").val() + " по " + $("#contractorReportToDate").val();
+            // Экспорт отчета в excel
+            tableToExcel('contractor_report_table', title);
+            return false;
+         //   printDiv("contractorReportContainer", title);
+        });
+
+        $("#loadContractorReport").button().click(function () {
+            updateContractorReport();
+        });
+
+        $("#monthReportFromDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            dateFormat: 'mm.yy',
+            defaultDate: new Date(),
+            onClose: function (dateText, inst) {
+                var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                $(this).val($.datepicker.formatDate('mm.yy', new Date(year, month, 1)));
+            
+                updateMonthReport();
+            }
+        });
+
+        $("#monthReportFromDate").focus(function () {
+            $(".ui-datepicker-calendar").hide();
+            $("#ui-datepicker-div").position({
+                my: "center top",
+                at: "center bottom",
+                of: $(this)
+            });
+        });
+
+        $("#employeesMonthReport").change(function () {
+            updateMonthReport();
+        });
+
+
+        $("#halfYearReportFromDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            dateFormat: 'mm.yy',
+            defaultDate: new Date((new Date()).getFullYear(), 0, 1),
+            onClose: function (dateText, inst) {
+                var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                $(this).val($.datepicker.formatDate('mm.yy', new Date(year, month, 1)));
+           
+                updateHalfYearReport();
+            }
+        });
+
+        $("#halfYearReportToDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            dateFormat: 'mm.yy',
+            defaultDate: new Date(),
+            onClose: function (dateText, inst) {
+                var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                $(this).val($.datepicker.formatDate('mm.yy', new Date(year, month, 1)));
+                //$(this).datepicker('setDate', new Date(year, month, 1));
+                updateHalfYearReport();
+            }
+        });
+
+        $("#employeesHalfYearReport").change(function () {
+            updateHalfYearReport();
+        });
+
+        $("#halfYearReportFromDate").focus(function () {
+            $(".ui-datepicker-calendar").hide();
+            $("#ui-datepicker-div").position({
+                my: "center top",
+                at: "center bottom",
+                of: $(this)
+            });
+        });
+
+        $("#halfYearReportToDate").focus(function () {
+            $(".ui-datepicker-calendar").hide();
+            $("#ui-datepicker-div").position({
+                my: "center top",
+                at: "center bottom",
+                of: $(this)
+            });
+        });
+
+        $("#contractorReportFromDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            dateFormat: 'mm.yy',
+            defaultDate: new Date((new Date()).getFullYear(), 0, 1),
+            onClose: function (dateText, inst) {
+                var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                $(this).val($.datepicker.formatDate('mm.yy', new Date(year, month, 1)));
+
+                updateContractorReport();
+            }
+        });
+
+        $("#contractorReportToDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            dateFormat: 'mm.yy',
+            defaultDate: new Date(),
+            onClose: function (dateText, inst) {
+                var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                $(this).val($.datepicker.formatDate('mm.yy', new Date(year, month, 1)));
+                //$(this).datepicker('setDate', new Date(year, month, 1));
+                updateContractorReport();
+            }
+        });
+
+        $("#managersContractorReport").change(function () {
+            updateContractorReport();
+        });
+
+        $("#contractorReportFromDate").focus(function () {
+            $(".ui-datepicker-calendar").hide();
+            $("#ui-datepicker-div").position({
+                my: "center top",
+                at: "center bottom",
+                of: $(this)
+            });
+        });
+
+        $("#contractorReportToDate").focus(function () {
+            $(".ui-datepicker-calendar").hide();
+            $("#ui-datepicker-div").position({
+                my: "center top",
+                at: "center bottom",
+                of: $(this)
+            });
+        });
+        
+        function createContractorReportTable(data, container) {
+            if (data) {
+                data.SubTotalRow = [];
+                data.SubTotalCol = [];
+                data.GrandTotal = {};
+                data.GrandTotal.Shipment = 0;
+                data.GrandTotal.Refunds = 0;
+             
+                var vars = {};
+                // TODO: GLOBAL VARS!!??
+                $.views.tags({
+                    setvar: function(key, value) {
+                     
+                        vars[key] = value;
+                       
+                    }
+                });
+
+                $.views.helpers({
+                    getvar: function(key) {
+                        return vars[key];
+                    }
+                })
+                container
+                .html($("#reportContractorFormTemplate")
+                .render(data, {
+                    formatValue: function (val) {
+                        return Math.round(val * 100) / 100;
+                    },
+                   
+                    getGrandTotalVal: function () {
+                        var grandTotal = {};
+                        grandTotal.Refunds = grandTotalRefunds2;
+                        return grandTotalRefunds2;
+                    },
+
+                    getSubTotalByContractor: function (dataCellFunc, data, contractorId, isClient) {
+                        var emptyVal = '&nbsp;';
+
+                        var result = '';
+                        var matches = $.grep(data, function (e) {
+                            if (isClient)
+                                return e.Client.ContractorId === contractorId;
+                            else
+                                return e.Factory.ContractorId === contractorId;
+                        });
+                        if (matches.length > 0) {
+                            var shipmentSubTotal = 0, refundsSubtotal = 0;
+
+                            for (var i = 0; i < matches.length; i++)
+                            {
+                                shipmentSubTotal += matches[i].QuantityShipment;
+                                refundsSubtotal += matches[i].QuantityRefunds;
+                            }
+                            result = '<td>' + shipmentSubTotal + '</td>';
+                            result += '<td>' + refundsSubtotal + '</td>';
+                        }
+                        else {
+                            result = '<td>' + emptyVal + '</td>';
+                            result += '<td>' + emptyVal + '</td>';
+                        }
+
+                        return result;
+                    },
+                    getReportData: function (dataCellFunc, data, factoryId, clientId, grandTotalRefunds) {
+                        var emptyVal = '&nbsp;';
+                       
+                        var result = '';
+                        var matches = $.grep(data, function (e) {
+                                return e.Client.ContractorId === clientId && e.Factory.ContractorId === factoryId;
+                            });
+                            if (matches.length > 0) {
+                           
+                                result = '<td>' + matches[0].QuantityShipment + '</td>';
+                                result += '<td>' + matches[0].QuantityRefunds + '</td>';
+                            }
+                            else {
+                                result = '<td>' + emptyVal + '</td>';
+                                result += '<td>' + emptyVal + '</td>';
+                            }
+
+                            return result;
+                    },
+
+                }));
+            }
+        }
+
+        function createReportTable(data, container) {
+            if (data) {
+                container
+                .html($("#reportFormTemplate")
+                .render(data,
+                {
+                    getDate: function (data, flag) {
+                        var date = new Date(parseInt(data.substr(6)));
+                        if(flag == 0)
+                            return date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear();
+                        else if(flag == 1)
+                            return (date.getMonth() + 1) + "." + date.getFullYear();
+
+                        return '';
+                    },
+                    formatValue: function (val) {
+                        return Math.round(val * 100) / 100;
+                    },
+                    getTdDataCell: function (textVal, val) {
+                        return '<td>' + textVal + '</td><td>' + val + '</td>';
+                    },
+                    getReportData: function (dataCellFunc, isEven, dates, arr, refunds, subTotal) {
+                        var emptyVal = '&nbsp;';
+                        var purchaseText = "наша";
+                        var saleText = "продажа";
+                        var profitText = "разница";
+                        trArr = [];
+                        for (var i = 0; i <= 2; i++) {
+                            trArr[i] = '<tr class="' + (isEven ? 'even' : 'odd') + '">';
+                        }
+
+                        $.each(dates, function (index, entry) {
+                            var matches = $.grep(arr, function (e) {
+                                return e.CreatedOf === entry.Period;
+                            });
+                            if (matches.length > 0) {
+                                //if (matches.length > 0) {
+                                trArr[0] += dataCellFunc(purchaseText, matches[0].PurchaseSum);
+                                trArr[1] += dataCellFunc(saleText, matches[0].SaleSum);
+                                trArr[2] += dataCellFunc(profitText, matches[0].Profit);
+                                // }
+                            }
+                            else {
+                                trArr[0] += dataCellFunc(purchaseText, emptyVal);
+                                trArr[1] += dataCellFunc(saleText, emptyVal);
+                                trArr[2] += dataCellFunc(profitText, emptyVal);
+                            }
+                        });
+                               
+                        trArr[0] += dataCellFunc(purchaseText, refunds.PurchaseSum);
+                        trArr[1] += dataCellFunc(saleText,refunds.SaleSum);
+                        trArr[2] += dataCellFunc(profitText, refunds.Profit);
+
+                        trArr[0] += dataCellFunc(purchaseText,subTotal.PurchaseSum);
+                        trArr[1] += dataCellFunc(saleText, subTotal.SaleSum);
+                        trArr[2] += dataCellFunc(profitText, subTotal.Profit);
+
+                        for (var i = 0; i <= 2; i++) {
+                            trArr[i] += '</tr>';
+                        }
+
+                        return trArr.join(" ");
+                    },
+                         
+                }));
+            }
+        }
+
+        function getMonthYear(datepicker, defaultMonth) {
+            var fromDate = datepicker.val();
+            var fromDateM = {};
+            if (!(fromDate.length > 0)) {
+                var d = new Date();
+                var m = 1;
+                if (defaultMonth > 0)
+                    m = defaultMonth;
+                else
+                    m = d.getMonth() + 1;
+                var str = m + '.';
+                datepicker.val(m+ '.' + d.getFullYear());
+
+                fromDateM.Month = parseInt(m);
+                fromDateM.Year = parseInt(d.getFullYear());
+            }
+            else {
+                fromDateM.Month = parseInt(fromDate.split('.')[0]);
+                fromDateM.Year = parseInt(fromDate.split('.')[1]);
+            }
+
+            return fromDateM;
+        }
+
+        function updateMonthReport() {
+            var fromDateM = getMonthYear($("#monthReportFromDate"));
+
+            var postData = {
+                monthNumber: fromDateM.Month,
+                yearNumber: fromDateM.Year,
+                employeeId: $("#employeesMonthReport").val()*1
+            };
+
+            $.ajax({
+                type: 'post',
+                url: '@Url.Action("GetMonthReport")',
+                 data: JSON.stringify(postData),
+                 contentType: "application/json; charset=utf-8",
+                 traditional: true,
+                 success: function (data) {
+                   //  if (!data.IsError) {
+                        // console.log(data);
+                         // jsrender table
+                     if (data.Periods.length > 0) {
+                         data.PeriodFlag = 0;
+                         createReportTable(data, $('#monthReportContainer'));
+                     }
+                     else
+                         $('#monthReportContainer').html('Нет данных');
+                     //}
+                     return false;
+                 }
+            });
+        }
+
+        function updateHalfYearReport() {
+            var fromDateM = getMonthYear($("#halfYearReportFromDate"),1);
+            var toDateM = getMonthYear($("#halfYearReportToDate"));
+           
+            var postData = {
+                monthFromNumber:fromDateM.Month,
+                yearFromNumber:fromDateM.Year,
+                monthToNumber: toDateM.Month,
+                yearToNumber: toDateM.Year,
+                employeeId: $("#employeesHalfYearReport").val() * 1
+            };
+
+            $.ajax({
+                type: 'post',
+                url: '@Url.Action("GetHalfYearReport")',
+                data: JSON.stringify(postData),
+                contentType: "application/json; charset=utf-8",
+                traditional: true,
+                success: function (data) {
+                    if (data.Periods.length > 0) {
+                        data.PeriodFlag = 1;
+                        createReportTable(data, $('#halfYearReportContainer'));
+                    }
+                    else
+                        $('#halfYearReportContainer').html('Нет данных');
+                    return false;
+                }
+            });
+        }
+
+        function updateContractorReport() {
+            var fromDateM = getMonthYear($("#contractorReportFromDate"), 1);
+            var toDateM = getMonthYear($("#contractorReportToDate"));
+
+            var postData = {
+                monthFromNumber: fromDateM.Month,
+                yearFromNumber: fromDateM.Year,
+                monthToNumber: toDateM.Month,
+                yearToNumber: toDateM.Year,
+                managerId: $("#managersContractorReport").val() * 1,
+            };
+
+            $.ajax({
+                type: 'post',
+                url: '@Url.Action("GetReportByContractor")',
+                data: JSON.stringify(postData),
+                contentType: "application/json; charset=utf-8",
+                traditional: true,
+                success: function (data) {
+                    if (data.Clients.length > 0) {
+                        // attach periods to data object
+                        // yyyy-MM-dd
+                        //
+                        data.SelectedPeriodFrom = fromDateM.Year + '-' + ("0" + fromDateM.Month).slice(-2) + '-01';
+                        data.SelectedPeriodTo = toDateM.Year + '-' + ("0" + toDateM.Month).slice(-2) + '-01';
+                  
+                        createContractorReportTable(data, $('#contractorReportContainer'));
+                    }
+                    else
+                       $('#contractorReportContainer').html('Нет данных');
+                    return false;
+                }
+            });
+        }
+    });
+</script>

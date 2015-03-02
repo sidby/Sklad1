@@ -1,0 +1,10 @@
+﻿@model SidBy.Sklad.Web.Models.SkladJqGridModel
+@using SidBy.Sklad.Web.Models
+@using Trirand.Web.Mvc
+
+
+
+@Html.Partial("_JqGridDocumentPartial", new JqGridViewDocParamsModel() { 
+    Grid = Model.DocumentGrid, GridId = "ShipmentGrid1", Title = @ViewBag.Title, DocumentTypeId =
+    (int)SidBy.Sklad.Domain.Enums.EntityEnum.DocumentTypeEnum.Shipment, ShowContractor = false
+})

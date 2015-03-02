@@ -11,6 +11,8 @@ using WebMatrix.WebData;
 using SidBy.Sklad.Web.Filters;
 using SidBy.Sklad.Web.Models;
 using SidBy.Sklad.Web.Resources.Controllers.Account;
+using SidBy.Sklad.Domain;
+using SidBy.Sklad.DataAccess;
 
 namespace SidBy.Sklad.Web.Controllers
 {
@@ -54,14 +56,14 @@ namespace SidBy.Sklad.Web.Controllers
         public ActionResult LogOff()
         {
             WebSecurity.Logout();
-
-            return RedirectToAction("Index", "Home");
+            //
+            return RedirectToAction("Index", "Indicators");
         }
 
         //
         // GET: /Account/Register
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         public ActionResult Register()
         {
             return View();
@@ -71,7 +73,7 @@ namespace SidBy.Sklad.Web.Controllers
         // POST: /Account/Register
 
         [HttpPost]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [ValidateAntiForgeryToken]
         public ActionResult Register(RegisterModel model)
         {
@@ -82,7 +84,8 @@ namespace SidBy.Sklad.Web.Controllers
                 {
                     WebSecurity.CreateUserAndAccount(model.UserName, model.Password);
                     WebSecurity.Login(model.UserName, model.Password);
-                    return RedirectToAction("Index", "Home");
+                    
+                    return RedirectToAction("Contractor", "Reference");
                 }
                 catch (MembershipCreateUserException e)
                 {

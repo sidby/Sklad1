@@ -31,7 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="libphonenumber-csharp-portable">
-      <HintPath>..\..\PhoneNumbers\PhoneNumbers\bin\Release\libphonenumber-csharp-portable.dll</HintPath>
+      <HintPath>bin\Debug\libphonenumber-csharp-portable.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -43,7 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Crypt\RandomGenerator.cs" />
     <Compile Include="DataAnnotations\PhoneNumberValidationAttribute.cs" />
+    <Compile Include="Helpers\ConverterHelper.cs" />
+    <Compile Include="Helpers\StringHelper.cs" />
+    <Compile Include="Helpers\ValidationHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

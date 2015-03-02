@@ -8,7 +8,7 @@
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{BB886A8E-AF1E-468D-97FF-250604BB78F5}</ProjectGuid>
-    <ProjectTypeGuids>{E3E379DF-F4C6-4180-9B81-6769533ABE47};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SidBy.Sklad.Web</RootNamespace>
@@ -64,10 +64,19 @@
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\EntityFramework.6.0.1\lib\net45\EntityFramework.dll</HintPath>
+      <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
-    <Reference Include="EntityFramework.SqlServer">
-      <HintPath>..\packages\EntityFramework.6.0.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\sources\npoi\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Data.Edm, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -85,6 +94,16 @@
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI">
+      <HintPath>..\..\..\sources\npoi\NPOI.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OOXML">
+      <HintPath>..\..\..\sources\npoi\NPOI.OOXML.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net, Version=2.0.6.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\sources\npoi\NPOI.OpenXml4Net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -118,6 +137,7 @@
     <Reference Include="System.Web.Mvc, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.Mvc.5.0.0\lib\net45\System.Web.Mvc.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.Optimization, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -125,7 +145,7 @@
     </Reference>
     <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.AspNet.Razor.3.0.0\lib\net45\System.Web.Razor.dll</HintPath>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.0\lib\net45\System.Web.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -182,14 +202,125 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="BL\DocumentOperation.cs" />
+    <Compile Include="BL\ExcelHelper.cs" />
+    <Compile Include="BL\ReportHelper.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\IndicatorsController.cs" />
+    <Compile Include="Controllers\MyCompanyController.cs" />
+    <Compile Include="Controllers\ReferenceController.cs" />
+    <Compile Include="Controllers\SaleController.cs" />
+    <Compile Include="Controllers\WarehouseController.cs" />
+    <Compile Include="Extensions\Extensions.cs" />
+    <Compile Include="Extensions\HtmlExtensions.cs" />
     <Compile Include="Filters\InitializeSimpleMembershipAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migration\UsersContextMigrationConfiguration.cs" />
+    <Compile Include="Migrations\201401061809049_initial.cs" />
+    <Compile Include="Migrations\201401061809049_initial.Designer.cs">
+      <DependentUpon>201401061809049_initial.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201401280631215_Product.cs" />
+    <Compile Include="Migrations\201401280631215_Product.Designer.cs">
+      <DependentUpon>201401280631215_Product.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201401281037426_ProductUpdated.cs" />
+    <Compile Include="Migrations\201401281037426_ProductUpdated.Designer.cs">
+      <DependentUpon>201401281037426_ProductUpdated.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201401310627435_Fix-Contract.cs" />
+    <Compile Include="Migrations\201401310627435_Fix-Contract.Designer.cs">
+      <DependentUpon>201401310627435_Fix-Contract.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201401310710411_DocumentCounter.cs" />
+    <Compile Include="Migrations\201401310710411_DocumentCounter.Designer.cs">
+      <DependentUpon>201401310710411_DocumentCounter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201401310822286_ProductLineComment.cs" />
+    <Compile Include="Migrations\201401310822286_ProductLineComment.Designer.cs">
+      <DependentUpon>201401310822286_ProductLineComment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201401311230228_DocumentSum.cs" />
+    <Compile Include="Migrations\201401311230228_DocumentSum.Designer.cs">
+      <DependentUpon>201401311230228_DocumentSum.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201402030756001_ProductLine-Sum.cs" />
+    <Compile Include="Migrations\201402030756001_ProductLine-Sum.Designer.cs">
+      <DependentUpon>201402030756001_ProductLine-Sum.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201402060956447_ProductLine_ProductOptional.cs" />
+    <Compile Include="Migrations\201402060956447_ProductLine_ProductOptional.Designer.cs">
+      <DependentUpon>201402060956447_ProductLine_ProductOptional.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201402101233223_CascadeDelete.cs" />
+    <Compile Include="Migrations\201402101233223_CascadeDelete.Designer.cs">
+      <DependentUpon>201402101233223_CascadeDelete.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201402111103194_ParentDocument.cs" />
+    <Compile Include="Migrations\201402111103194_ParentDocument.Designer.cs">
+      <DependentUpon>201402111103194_ParentDocument.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201402111337443_AddDocumentContractor.cs" />
+    <Compile Include="Migrations\201402111337443_AddDocumentContractor.Designer.cs">
+      <DependentUpon>201402111337443_AddDocumentContractor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201402120917172_SaleSum.cs" />
+    <Compile Include="Migrations\201402120917172_SaleSum.Designer.cs">
+      <DependentUpon>201402120917172_SaleSum.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201402240831041_ContractorMargin.cs" />
+    <Compile Include="Migrations\201402240831041_ContractorMargin.Designer.cs">
+      <DependentUpon>201402240831041_ContractorMargin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201402260735234_MarginAbs.cs" />
+    <Compile Include="Migrations\201402260735234_MarginAbs.Designer.cs">
+      <DependentUpon>201402260735234_MarginAbs.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201402260757127_ProductLineSupplierId.cs" />
+    <Compile Include="Migrations\201402260757127_ProductLineSupplierId.Designer.cs">
+      <DependentUpon>201402260757127_ProductLineSupplierId.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201402270650401_Folders.cs" />
+    <Compile Include="Migrations\201402270650401_Folders.Designer.cs">
+      <DependentUpon>201402270650401_Folders.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201402270656434_Folders36.cs" />
+    <Compile Include="Migrations\201402270656434_Folders36.Designer.cs">
+      <DependentUpon>201402270656434_Folders36.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201402281214020_IsOutdated.cs" />
+    <Compile Include="Migrations\201402281214020_IsOutdated.Designer.cs">
+      <DependentUpon>201402281214020_IsOutdated.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201403041255386_ContactPersonName.cs" />
+    <Compile Include="Migrations\201403041255386_ContactPersonName.Designer.cs">
+      <DependentUpon>201403041255386_ContactPersonName.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201403061410075_ProductAttributes.cs" />
+    <Compile Include="Migrations\201403061410075_ProductAttributes.Designer.cs">
+      <DependentUpon>201403061410075_ProductAttributes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201403180919136_Discount.cs" />
+    <Compile Include="Migrations\201403180919136_Discount.Designer.cs">
+      <DependentUpon>201403180919136_Discount.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migration\SkladDataContextMigrationConfiguration.cs" />
     <Compile Include="Models\AccountModels.cs" />
+    <Compile Include="Models\ContactListModel.cs" />
+    <Compile Include="Models\ContractorDetailsModel.cs" />
+    <Compile Include="Models\DocumentProductLineModel.cs" />
+    <Compile Include="Models\ExcelReportInfo.cs" />
+    <Compile Include="Models\IndicatorsModel.cs" />
+    <Compile Include="Models\JqGridViewDocParamsModel.cs" />
+    <Compile Include="Models\LogJqGridModel.cs" />
+    <Compile Include="Models\MyEmployeesJqGridModel.cs" />
+    <Compile Include="Models\ProductArticlePriceModel.cs" />
+    <Compile Include="Models\SheetStyle.cs" />
+    <Compile Include="Models\SkladJqGridModel.cs" />
+    <Compile Include="Models\JqGridViewParamsModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\Controllers\Account\ErrorStrings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -383,6 +514,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\images\document.png" />
+    <Content Include="Content\images\folder-open.png" />
+    <Content Include="Content\images\folder.png" />
+    <Content Include="Content\plupload\Moxie.swf" />
+    <Content Include="Content\plupload\Moxie.xap" />
     <Content Include="Content\themes\base\images\animated-overlay.gif" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
@@ -445,15 +581,102 @@
     <Content Include="Content\themes\base\minified\jquery.ui.tabs.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.theme.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.tooltip.min.css" />
+    <Content Include="Content\themes\redmond\images\animated-overlay.gif" />
+    <Content Include="Content\themes\redmond\images\ui-bg_flat_0_aaaaaa_40x100.png" />
+    <Content Include="Content\themes\redmond\images\ui-bg_flat_55_fbec88_40x100.png" />
+    <Content Include="Content\themes\redmond\images\ui-bg_glass_75_d0e5f5_1x400.png" />
+    <Content Include="Content\themes\redmond\images\ui-bg_glass_85_dfeffc_1x400.png" />
+    <Content Include="Content\themes\redmond\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="Content\themes\redmond\images\ui-bg_gloss-wave_55_5c9ccc_500x100.png" />
+    <Content Include="Content\themes\redmond\images\ui-bg_inset-hard_100_f5f8f9_1x100.png" />
+    <Content Include="Content\themes\redmond\images\ui-bg_inset-hard_100_fcfdfd_1x100.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_217bc0_256x240.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_469bdd_256x240.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_6da8d5_256x240.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_d8e7f3_256x240.png" />
+    <Content Include="Content\themes\redmond\images\ui-icons_f9bd01_256x240.png" />
+    <Content Include="Content\themes\redmond\jquery-ui.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.accordion.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.all.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.autocomplete.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.base.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.button.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.core.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.datepicker.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.dialog.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.menu.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.progressbar.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.resizable.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.selectable.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.slider.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.spinner.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.tabs.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.theme.css" />
+    <Content Include="Content\themes\redmond\jquery.ui.tooltip.css" />
+    <Content Include="Content\themes\redmond\minified\images\animated-overlay.gif" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_flat_0_aaaaaa_40x100.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_flat_55_fbec88_40x100.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_glass_75_d0e5f5_1x400.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_glass_85_dfeffc_1x400.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_gloss-wave_55_5c9ccc_500x100.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_inset-hard_100_f5f8f9_1x100.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-bg_inset-hard_100_fcfdfd_1x100.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_217bc0_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_469bdd_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_6da8d5_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_d8e7f3_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\images\ui-icons_f9bd01_256x240.png" />
+    <Content Include="Content\themes\redmond\minified\jquery-ui.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.accordion.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.autocomplete.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.button.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.core.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.datepicker.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.dialog.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.menu.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.progressbar.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.resizable.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.selectable.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.slider.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.spinner.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.tabs.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.theme.min.css" />
+    <Content Include="Content\themes\redmond\minified\jquery.ui.tooltip.min.css" />
+    <Content Include="Content\themes\ui.jqcombobox.css" />
+    <Content Include="Content\themes\ui.jqdropdownlist.css" />
+    <Content Include="Content\themes\ui.jqgrid.css" />
+    <Content Include="Content\themes\ui.jqmultiselect.css" />
+    <Content Include="Content\themes\ui.jqtreeview.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <None Include="Scripts\jquery-2.0.3.intellisense.js" />
+    <Content Include="Scripts\fileupload\jquery.fileupload-angular.js" />
+    <Content Include="Scripts\fileupload\jquery.fileupload-audio.js" />
+    <Content Include="Scripts\fileupload\jquery.fileupload-image.js" />
+    <Content Include="Scripts\fileupload\jquery.fileupload-jquery-ui.js" />
+    <Content Include="Scripts\fileupload\jquery.fileupload-process.js" />
+    <Content Include="Scripts\fileupload\jquery.fileupload-ui.js" />
+    <Content Include="Scripts\fileupload\jquery.fileupload-validate.js" />
+    <Content Include="Scripts\fileupload\jquery.fileupload-video.js" />
+    <Content Include="Scripts\fileupload\jquery.fileupload.js" />
+    <Content Include="Scripts\fileupload\jquery.iframe-transport.js" />
+    <Content Include="Scripts\fileupload\vendor\jquery.ui.widget.js" />
+    <Content Include="Scripts\i18n\jquery.ui.datepicker-ru.js" />
+    <Content Include="Scripts\jsrender.js" />
+    <Content Include="Scripts\jsrender.min.js" />
+    <Content Include="Scripts\plupload\i18n\ru.js" />
     <Content Include="Scripts\jquery-2.0.3.js" />
     <Content Include="Scripts\jquery-2.0.3.min.js" />
     <Content Include="Scripts\jquery-2.0.3.min.map" />
     <Content Include="Scripts\jquery-ui-1.10.3.js" />
     <Content Include="Scripts\jquery-ui-1.10.3.min.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery.cookie.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
     <Content Include="Scripts\jquery.validate.js" />
@@ -463,7 +686,25 @@
     <Content Include="Scripts\knockout-3.0.0.debug.js" />
     <Content Include="Scripts\knockout-3.0.0.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
-    <Content Include="Web.config" />
+    <Content Include="Scripts\plupload\moxie.js" />
+    <Content Include="Scripts\plupload\moxie.min.js" />
+    <Content Include="Scripts\plupload\plupload.js" />
+    <Content Include="Scripts\plupload\plupload.min.js" />
+    <Content Include="Scripts\sklad-ui-0.0.1.js" />
+    <Content Include="Scripts\trirand\i18n\grid.locale-en.js" />
+    <Content Include="Scripts\trirand\i18n\grid.locale-ru.js" />
+    <Content Include="Scripts\trirand\jquery.jqAutoComplete.min.js" />
+    <Content Include="Scripts\trirand\jquery.jqChart.exporting.min.js" />
+    <Content Include="Scripts\trirand\jquery.jqChart.min.js" />
+    <Content Include="Scripts\trirand\jquery.jqComboBox.min.js" />
+    <Content Include="Scripts\trirand\jquery.jqDatePicker.min.js" />
+    <Content Include="Scripts\trirand\jquery.jqDropDownList.min.js" />
+    <Content Include="Scripts\trirand\jquery.jqGrid.js" />
+    <Content Include="Scripts\trirand\jquery.jqMultiSelect.min.js" />
+    <Content Include="Scripts\trirand\jquery.jqTreeView.min.js" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -495,13 +736,34 @@
     <Content Include="Views\Account\Register.cshtml" />
     <Content Include="Views\Account\ExternalLoginFailure.cshtml" />
     <Content Include="Views\Account\ExternalLoginConfirmation.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Web.config" />
+    <Content Include="Views\Indicators\Index.cshtml" />
+    <Content Include="Views\MyCompany\LegalEntity.cshtml" />
+    <Content Include="Views\MyCompany\MyEmployees.cshtml" />
+    <Content Include="Views\MyCompany\Warehouse.cshtml" />
+    <Content Include="Views\Reference\Contractor.cshtml" />
+    <Content Include="Views\Reference\Region.cshtml" />
+    <Content Include="Views\Shared\_JqGridStandart.cshtml" />
+    <Content Include="Views\MyCompany\ContactList.cshtml" />
+    <Content Include="Views\Shared\_Log.cshtml" />
+    <Content Include="Views\MyCompany\ContractorDetails.cshtml" />
+    <Content Include="Views\Reference\Product.cshtml" />
+    <Content Include="Views\Warehouse\Posting.cshtml" />
+    <Content Include="Views\Warehouse\Cancellation.cshtml" />
+    <Content Include="Views\Warehouse\Residues.cshtml" />
+    <Content Include="Views\Warehouse\Revs.cshtml" />
+    <Content Include="Views\Sale\CustomerOrders.cshtml" />
+    <Content Include="Views\Sale\Shipment.cshtml" />
+    <Content Include="Views\Sale\Refunds.cshtml" />
+    <Content Include="Views\Sale\Profitability.cshtml" />
+    <Content Include="Views\Sale\Debt.cshtml" />
+    <Content Include="Views\Shared\_JqGridDocumentPartial.cshtml" />
+    <Content Include="Views\Home\Document.cshtml" />
+    <Content Include="Views\Shared\_SearchProductPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -510,6 +772,72 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Migrations\201401061809049_initial.resx">
+      <DependentUpon>201401061809049_initial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201401280631215_Product.resx">
+      <DependentUpon>201401280631215_Product.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201401281037426_ProductUpdated.resx">
+      <DependentUpon>201401281037426_ProductUpdated.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201401310627435_Fix-Contract.resx">
+      <DependentUpon>201401310627435_Fix-Contract.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201401310710411_DocumentCounter.resx">
+      <DependentUpon>201401310710411_DocumentCounter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201401310822286_ProductLineComment.resx">
+      <DependentUpon>201401310822286_ProductLineComment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201401311230228_DocumentSum.resx">
+      <DependentUpon>201401311230228_DocumentSum.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402030756001_ProductLine-Sum.resx">
+      <DependentUpon>201402030756001_ProductLine-Sum.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402060956447_ProductLine_ProductOptional.resx">
+      <DependentUpon>201402060956447_ProductLine_ProductOptional.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402101233223_CascadeDelete.resx">
+      <DependentUpon>201402101233223_CascadeDelete.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402111103194_ParentDocument.resx">
+      <DependentUpon>201402111103194_ParentDocument.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402111337443_AddDocumentContractor.resx">
+      <DependentUpon>201402111337443_AddDocumentContractor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402120917172_SaleSum.resx">
+      <DependentUpon>201402120917172_SaleSum.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402240831041_ContractorMargin.resx">
+      <DependentUpon>201402240831041_ContractorMargin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402260735234_MarginAbs.resx">
+      <DependentUpon>201402260735234_MarginAbs.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402260757127_ProductLineSupplierId.resx">
+      <DependentUpon>201402260757127_ProductLineSupplierId.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402270650401_Folders.resx">
+      <DependentUpon>201402270650401_Folders.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402270656434_Folders36.resx">
+      <DependentUpon>201402270656434_Folders36.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201402281214020_IsOutdated.resx">
+      <DependentUpon>201402281214020_IsOutdated.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201403041255386_ContactPersonName.resx">
+      <DependentUpon>201403041255386_ContactPersonName.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201403061410075_ProductAttributes.resx">
+      <DependentUpon>201403061410075_ProductAttributes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201403180919136_Discount.resx">
+      <DependentUpon>201403180919136_Discount.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\Controllers\Account\ErrorStrings.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>ErrorStrings.Designer.cs</LastGenOutput>
@@ -664,9 +992,21 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Trirand\4.5.4\Trirand.Web.Mvc.csproj">
+      <Project>{cf662479-c861-4f77-b24c-4be20e0b1e85}</Project>
+      <Name>Trirand.Web.Mvc</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SidBy.Common\SidBy.Common.csproj">
       <Project>{2d8a1765-e615-4bf3-8ef7-4a4ebda39a59}</Project>
       <Name>SidBy.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SidBy.Sklad.DataAccess\SidBy.Sklad.DataAccess.csproj">
+      <Project>{e417d60c-db26-46a9-9c7f-793b3a353dba}</Project>
+      <Name>SidBy.Sklad.DataAccess</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SidBy.Sklad.Domain\SidBy.Sklad.Domain.csproj">
+      <Project>{a1795967-d0e3-46ed-9013-755e012062d0}</Project>
+      <Name>SidBy.Sklad.Domain</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

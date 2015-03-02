@@ -5,6 +5,7 @@ using System.Threading;
 using System.Web.Mvc;
 using WebMatrix.WebData;
 using SidBy.Sklad.Web.Models;
+using SidBy.Sklad.DataAccess;
 
 namespace SidBy.Sklad.Web.Filters
 {
@@ -38,7 +39,8 @@ namespace SidBy.Sklad.Web.Filters
                         }
                     }
 
-                    WebSecurity.InitializeDatabaseConnection("DefaultConnection", "UserProfile", "UserId", "UserName", autoCreateTables: true);
+                    if (!WebSecurity.Initialized)
+                        WebSecurity.InitializeDatabaseConnection("DefaultConnection", "UserProfile", "UserId", "UserName", autoCreateTables: true);
                 }
                 catch (Exception ex)
                 {

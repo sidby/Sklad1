@@ -1,0 +1,147 @@
+﻿@model SidBy.Sklad.Web.Models.ContactListModel
+@using SidBy.Sklad.Web.Models
+@using Trirand.Web.Mvc
+
+<table class="sklad-top-menu">
+    <tr>
+         <td colspan="2">
+             <a href="@Url.Action("Contractor","Reference")">Вернуться к списку контрагентов</a>
+         </td>
+    </tr>
+    <tr>
+        <td><div class="sklad-title">Список контактов для @Model.Company.Name (@Model.Company.Code)</div></td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            Ответственный - <strong>@Model.Company.Responsible.DisplayName 
+            (@Model.Company.Responsible.Surname @Model.Company.Responsible.Name @Model.Company.Responsible.MiddleName)</strong>
+            @(!String.IsNullOrEmpty(@Model.Company.Responsible.Phone1) ? " т. " + @Model.Company.Responsible.Phone1 : "" )
+            @(!String.IsNullOrEmpty(@Model.Company.Responsible.Phone2) ? " т. " + @Model.Company.Responsible.Phone2 : "" )
+            @(Html.Raw(!String.IsNullOrEmpty(@Model.Company.Responsible.UserEmail) ? "<a href=\"mailto:"+@Model.Company.Responsible.UserEmail+"\">"+ @Model.Company.Responsible.UserEmail+"</a>" : "" ))
+            @(!String.IsNullOrEmpty(@Model.Company.Responsible.Skype) ? " Skype: " + @Model.Company.Responsible.Skype : "" )
+        </td>
+    </tr>
+    <tr><td colspan="2">@Model.Company.Responsible.Comment</td></tr>
+</table>
+
+@{
+    string jqGridContactListId = "ContactList1";    
+}
+
+@*<input type="hidden" value="@Model.Company.ContractorId" id="ContractorId" name="ContractorId" />*@
+@Html.Trirand().JQGrid(Model.Grid, jqGridContactListId)
+
+<h2>Добавить новый контакт</h2>
+@*@using (Html.BeginForm(new { ReturnUrl = Url.Action("ContactList", "MyCompany", new { contractorId = Model.Company.ContractorId }) }))
+{
+    *@<fieldset>
+        <legend>Создать контакт</legend>
+        <ol>
+            <li>
+                <label for="DisplayName">Отображаемое имя</label>
+                <input type="text" id="DisplayName" name="DisplayName" />
+            </li>
+          
+            <li>
+               <label for="Name">Имя</label>
+               <input type="text" id="Name" name="Name" />
+            </li>
+            <li>
+               <label for="Surname">Фамилия</label>
+               <input type="text" id="Surname" name="Surname" />
+            </li>
+            <li>
+               <label for="Phone1">Телефон</label>
+               <input type="text" id="Phone1" name="Phone1" />
+            </li>
+            <li>
+               <label for="UserEmail">Email</label>
+               <input type="text" id="UserEmail" name="UserEmail" />
+            </li>
+            <li>
+               <label for="Skype">Skype</label>
+               <input type="text" id="Skype" name="Skype" />
+            </li>
+        </ol>
+        <button id="AddNewContact" name="AddNewContact">Создать</button>
+    </fieldset>
+@*}*@
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#AddNewContact").click(function () {
+            if ($("#DisplayName").val()) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("AddNewContact", "MyCompany")",
+                    success: function (data) {
+                        jQuery("#@jqGridContactListId").trigger("reloadGrid");
+                        $("#DisplayName").val('');
+                        $("#Name").val('');
+                        $("#Surname").val('');
+                        $("#Phone1").val('');
+                        $("#UserEmail").val('');
+                        $("#Skype").val('');
+                    },
+                    data: {
+                        "contractorId": '@Model.Company.ContractorId',
+                        "displayName": $("#DisplayName").val(),
+                        "name": $("#Name").val(),
+                        "surname": $("#Surname").val(),
+                        "phone1": $("#Phone1").val(),
+                        "userEmail": $("#UserEmail").val(),
+                        "skype": $("#Skype").val()
+                    }
+                });
+            }
+        });
+
+        @{string editUrl = Url.Action("ContactListEditRows", "MyCompany",
+            new
+            {
+                jqGridID = jqGridContactListId,
+                editMode = 1,
+                contractorId = Model.Company.ContractorId
+            });}
+        jQuery("#@jqGridContactListId").setGridParam({
+            'editurl': '@Html.Raw(editUrl)'
+        });
+
+        $("#DisplayName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("GetUsersByDisplayName", "MyCompany")",
+                    data: { term: request.term, count: 20 },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    processdata: true,
+                    async: true,
+                    cache: false,
+                    success: function (data) {
+                        response(data);
+                    },
+                })
+            },
+            minLength: 2,
+            select: function (event, ui) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("AddContactById", "MyCompany")",
+                    success: function (data) {
+                        jQuery("#@jqGridContactListId").trigger("reloadGrid");
+                    },
+                    data: { "contractorId": "@Model.Company.ContractorId", "userId": ui.item.UserId }
+                });
+           
+                return false;
+            }
+        }).data("ui-autocomplete")._renderItem = function (ul, item) {
+            return $("<li>")
+            .append("<a>" + item.DisplayName + "</a>")
+            .appendTo(ul);
+            //"<br>" + item.Name + item.SurName + 
+        };
+
+    });
+</script>

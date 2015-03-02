@@ -1,0 +1,82 @@
+﻿@model SidBy.Sklad.Web.Models.JqGridViewDocParamsModel
+@using Trirand.Web.Mvc
+@using SidBy.Sklad.Domain.Enums
+
+@{if(@Model.DocumentTypeId != (int)EntityEnum.DocumentTypeEnum.Refunds){
+<script type="text/javascript">
+
+    $(function () {
+        $("#@(Model.GridId + "_" + "btnDocumentAdd")").button({
+            icons: {
+                primary: "ui-icon-plus"
+            }
+        }).on("click", function (event) {
+            window.location.href = "@Url.Action("Document", "Home", new { documentTypeId = Model.DocumentTypeId })";
+        });
+    });
+
+</script>
+}}
+<table class="sklad-top-menu">
+    <tr>
+        <td><div class="sklad-title">@Model.Title</div></td>
+        @{if(@Model.DocumentTypeId != (int)EntityEnum.DocumentTypeEnum.Refunds){
+        <td><button id="@(Model.GridId + "_" + "btnDocumentAdd")">Создать</button></td>
+        }}
+        <td>
+@Html.Partial("_SearchProductPartial",Model.DocumentTypeId)
+        </td>
+        @*<td><a href="@Url.Action("Document", "Home", new { documentTypeId = Model.DocumentTypeId })">Создать</a></td>*@
+    </tr>
+</table>
+
+@Html.Trirand().JQGrid(Model.Grid, Model.GridId)
+
+@Html.Trirand().JQAutoComplete(new JQAutoComplete {
+     AutoCompleteMode = AutoCompleteMode.BeginsWith,
+        DataUrl = Url.Action("GetContractorByCodeAutoComplete", "Home"),
+        DataField = "Code",
+        ID = "ContractorId",
+        DisplayMode = AutoCompleteDisplayMode.ControlEditor,
+        MinLength = 2,
+}, "ContractorAutoComplete")
+
+
+    @Html.Trirand().JQDatePicker(new JQDatePicker {
+    MaxDate = DateTime.MaxValue,
+    MinDate = new DateTime(2013,1,1),
+    DisplayMode = DatePickerDisplayMode.ControlEditor,
+    ShowOn = ShowOn.Focus,
+    OnSelectedCallbackFunction = "CreatedOfPickerDateSelectedTrigger",
+}, "CreatedOfPicker")
+
+    @Html.Trirand().JQDatePicker(new JQDatePicker {
+    MaxDate = DateTime.MaxValue,
+    MinDate = new DateTime(2013,1,1),
+    DisplayMode = DatePickerDisplayMode.ControlEditor,
+    ShowOn = ShowOn.Focus,
+    OnSelectedCallbackFunction = "CreatedOfPickerDateSelectedTrigger",
+}, "PlannedDatePicker")
+
+    <script type="text/javascript">
+        function CreatedOfPickerDateSelectedTrigger(dateText, inst) {
+            var sgrid = $("#@Model.GridId")[0];
+            sgrid.triggerToolbar();
+        }
+
+    function formatDocumentEditLink(cellvalue, options, rowObject) {
+        return '<ul class="grid-ui-icons"><li><a href="/Home/Document?documentId='
+            + cellvalue + '" title="Редактировать"><span class="ui-icon ui-icon-pencil"></span></a></li></ul>';
+    }
+    function unFormatDocumentEditLink(cellvalue, options, cell) {
+        return $('img', cell).attr('src');
+    }
+
+    function customSummaryFunc(val, name, record) {
+        // console.log(val);
+        return parseFloat(val || 0) + parseFloat((record[name] || 0));
+    }
+
+
+</script>
+

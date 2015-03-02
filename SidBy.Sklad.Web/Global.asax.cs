@@ -1,4 +1,5 @@
-﻿using SidBy.Sklad.Web.Migration;
+﻿using SidBy.Sklad.DataAccess;
+using SidBy.Sklad.Web.Migration;
 using SidBy.Sklad.Web.Models;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using WebMatrix.WebData;
 
 namespace SidBy.Sklad.Web
 {
@@ -20,6 +22,8 @@ namespace SidBy.Sklad.Web
     {
         protected void Application_Start()
         {
+            log4net.Config.XmlConfigurator.Configure();
+
             AreaRegistration.RegisterAllAreas();
 
             WebApiConfig.Register(GlobalConfiguration.Configuration);
@@ -29,7 +33,20 @@ namespace SidBy.Sklad.Web
             AuthConfig.RegisterAuth();
 
             // Set the database init strategy
-            //UsersContext.UsersContext.Database.SetInitializer(new MigrateDatabaseToLatestVersion<UsersContext, UsersContextMigrationConfiguration>());
+            //SkladDataContextMigrationConfiguration
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion<SkladDataContext, SkladDataContextMigrationConfiguration>());
+            // DebugDatabaseInitializer
+
+
+
+            //context.LegalEntities.Add(new LegalEntity() { Name = "Трикотажный ряд", IsVATPayer = true });
+            //context.SaveChanges();
+
+            if (!WebSecurity.Initialized)
+            {
+                WebSecurity.InitializeDatabaseConnection("DefaultConnection", "UserProfile", "UserId", "UserName", autoCreateTables: true);
+            }
+           //UsersContextUsersContext.Database.SetInitializer(new MigrateDatabaseToLatestVersion<UsersContext, UsersContextMigrationConfiguration>());
             // trigger the database init strategy with a read
             //new UsersContext().UserProfiles.Find(1);
         }

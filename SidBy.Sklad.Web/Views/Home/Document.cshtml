@@ -1,0 +1,500 @@
+﻿@model SidBy.Sklad.Web.Models.DocumentProductLineModel
+@using Trirand.Web.Mvc
+@using SidBy.Sklad.Web
+@using SidBy.Sklad.Domain.Enums
+
+<p><button id="SaveDocument" name="SaveDocument">Сохранить</button> 
+    @{if (Model.DocumentItem.DocumentTypeId == (int)EntityEnum.DocumentTypeEnum.CustomerOrders
+        || Model.DocumentItem.DocumentTypeId == (int)EntityEnum.DocumentTypeEnum.Shipment)
+    {
+        
+            string buttonTitle = "Создать";
+            if (Model.DocumentItem.DocumentTypeId == (int)EntityEnum.DocumentTypeEnum.CustomerOrders)
+            {
+                buttonTitle = "Отгрузить";
+            }
+            if (Model.DocumentItem.DocumentTypeId == (int)EntityEnum.DocumentTypeEnum.Shipment)
+            {
+                buttonTitle = "Возврат покупателя";
+            }
+            
+        <button id="CreateRelatedDocument" name="CreateRelatedDocument">@buttonTitle</button> 
+    }}
+
+    <button id="Report" name="Report">Отчет</button> 
+
+    <label style="display:inline;">@Model.DocumentItem.DocumentType.Name №</label>
+     @Html.TextBoxFor(m => m.DocumentItem.Number, new { @style = "width:70px;" }) 
+    <label style="display:inline;">от</label>
+@Html.TextBoxFor(m => m.DocumentItem.CreatedOf, "{0:dd.MM.yyyy}",
+new { @id = "createdOfDatepicker", @style = "width:100px;" })
+@{
+    int toWarehouseId = 0;
+    toWarehouseId = (Model.DocumentItem.ToWarehouseId == null) ? 0 : (int)Model.DocumentItem.ToWarehouseId;
+
+    List<SelectListItem> warehousesToSelectList = Model.WarehouseList.ToSelectListItems(m => m.Name,
+        m => m.WarehouseId.ToString(),
+        m => m.WarehouseId == toWarehouseId).ToList<SelectListItem>();
+
+    // if there was an client than form userId based on chosen contractor dynamically
+    // userId should be = responsible person of the contractor    
+    int userId = 0;
+    userId = (Model.DocumentItem.EmployeeId == null) ? WebSecurity.CurrentUserId : (int)Model.DocumentItem.EmployeeId;
+
+    List<SelectListItem> employeesToSelectList =  Model.EmployeeList
+    .Where(x => x.ContactTypeId == (int)EntityEnum.ContactTypeEnum.Employee).ToSelectListItems(
+    m => m.DisplayName,
+    m => m.UserId.ToString(),
+    m => m.UserId == userId).ToList<SelectListItem>();
+}
+
+<label style="display:inline;">Проведен</label>&nbsp;@Html.CheckBoxFor(m => m.DocumentItem.IsCommitted) 
+
+<label style="display:inline;">Склад</label> 
+    @Html.DropDownListFor(m => m.DocumentItem.ToWarehouse.WarehouseId, warehousesToSelectList)
+</p>
+
+@{
+    string displayContractorEmployee = "none";
+    if (Model.DocumentItem.DocumentTypeId == (int)EntityEnum.DocumentTypeEnum.CustomerOrders
+        || Model.DocumentItem.DocumentTypeId == (int)EntityEnum.DocumentTypeEnum.Refunds
+        || Model.DocumentItem.DocumentTypeId == (int)EntityEnum.DocumentTypeEnum.Shipment)
+    {
+
+        displayContractorEmployee = "inline";
+    }}
+<p id="contractorEmployeeBlock" style="display:@displayContractorEmployee;">
+@{
+    string contractorCode = String.Empty;
+    string contractorName = "Контрагент";
+    decimal contractorMarginAbs = 0;
+    if(Model.DocumentItem.Contractor != null)
+    {
+        contractorCode = Model.DocumentItem.Contractor.Code;
+        contractorName = String.Format("{0} ({1})", Model.DocumentItem.Contractor.Name, Model.DocumentItem.Contractor.Code);
+        contractorMarginAbs = Model.DocumentItem.Contractor.MarginAbs;
+    }
+}
+    @*for="ContractorDoc"*@
+<label style="display:inline;" for="ContractorDoc" >@contractorName</label>
+<input style="display:@displayContractorEmployee;" type="text" id="ContractorDoc" value="@contractorCode" style="width:100px;" name="ContractorDoc" />
+
+  @*value="@Model.DocumentItem.Contractor.Code"
+    
+                    ViewBag.ContractorCode = contractor.Code;
+                ViewBag.ContractorName = contractor.Name;
+    *@ 
+<input type="hidden" id="ContractorDocId" name="ContractorDocId" value="@Model.DocumentItem.ContractorId" />
+
+
+<label style="display:inline;" for="Employee">Сотрудник</label>
+     @Html.DropDownListFor(m => m.DocumentItem.Employee.UserId, employeesToSelectList)
+
+@{if(Model.DocumentItem.DocumentTypeId == (int)EntityEnum.DocumentTypeEnum.CustomerOrders){
+<label style="display:inline;">План. дата отгрузки</label>
+      @Html.TextBoxFor(m => m.DocumentItem.PlannedDate, "{0:dd.MM.yyyy}",
+      new { @id = "planDateDatepicker", @style = "width:100px;" })
+    }}
+
+  <label style="display:inline;">Загрузить из Excel:</label> <input id="fileupload" type="file" style="width:80px;" name="files" multiple="multiple"/>
+</p>
+
+
+@*<div id="uploadProductFilesFilelist">Ваш браузер не поддерживает Flash, Silverlight и HTML5.</div>
+<br />
+<div id="uploadProductFilesContainer">
+    <a id="uploadProductFilesPickfiles" href="javascript:;">[Выбрать файлы]</a> 
+    <a id="uploadfiles" href="javascript:;">[Загрузить файлы]</a>
+</div>*@
+
+@Html.Trirand().JQGrid(Model.Products, Model.JGridName)
+   
+<div style="display:block;">
+    
+    <div style="float:left;">
+<h2>Добавить новый товар</h2>
+<label for="ContractorCode">Код фабрики</label>
+<input type="text" id="ContractorCode" name="ContractorCode" />
+<h3 class="SupplierName"></h3>
+<input type="hidden" id="DocId" name="DocId" value="@Model.DocumentItem.DocumentId" />
+<input type="hidden" id="SupplierId" name="SupplierId" />
+<div id="ProductFields" style="visibility:hidden;">
+<fieldset>
+    <legend>Добавить товар</legend>
+    <ol>
+        <li>
+            <label for="Article">Артикул</label>
+            <input type="text" id="Article" name="Article" />
+        </li>
+        <li>
+            <label for="Quantity">Количество</label>
+            <input type="text" id="Quantity" name="Quantity" value="1" />
+        </li>
+        <li>
+            <label for="PurchasePrice">Цена закупки</label>
+            <input type="text" id="PurchasePrice" name="PurchasePrice" value="0" />
+        </li>
+        <li style="display:@displayContractorEmployee;">
+            <label for="MarginAbs">Наценка</label>
+            <input type="text" id="MarginAbs" name="MarginAbs" value="@contractorMarginAbs" />
+        </li>
+       <li>
+            <label for="Discount">Скидка</label>
+            <input type="text" id="Discount" name="Discount" value="0" />
+        </li>
+        <li>
+            <label for="ProductComment">Комментарий</label>
+            <input type="text" id="ProductComment" name="ProductComment" />
+        </li>
+       
+    </ol>
+    <button id="AddNewProduct" name="AddNewProduct">Добавить</button>
+</fieldset>
+</div>
+
+        </div>
+        <div style="float:left;padding-top:30px;padding-left:30px;">
+            <label>Комментарий</label> 
+             @Html.TextAreaFor(m => m.DocumentItem.Comment, new { cols = 10, rows = 10 })     
+        </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#createdOfDatepicker").datepicker();
+        $("#planDateDatepicker").datepicker();
+        
+        @{if(Model.DocumentItem.ParentDocumentId != null){
+              
+           <text>
+                $("label[for='ContractorDoc']").hide();
+                $("#ContractorDoc").hide();
+                $("#DocumentItem_IsCommitted").prop('checked', true);
+        </text>
+        }}
+
+        @{if (Model.DocumentItem.DocumentTypeId == (int)EntityEnum.DocumentTypeEnum.CustomerOrders
+        || Model.DocumentItem.DocumentTypeId == (int)EntityEnum.DocumentTypeEnum.Shipment)
+        {
+            <text>$("#CreateRelatedDocument").click(function () {
+            saveDocumentPost(true);
+            });</text>
+        }}
+
+        function saveDocumentPost(createRelated) {
+            if ($("#contractorEmployeeBlock").css('display') != 'none') {
+                if (!$("#ContractorDocId").val()) {
+                    alert('Необходимо выбрать контрагента!');
+                    return false;
+                }
+            }
+
+            if (createRelated)
+                $("#DocumentItem_IsCommitted").val(true);
+
+            // Check if the grid has any rows
+            if (jQuery("#@Model.JGridName").jqGrid('getGridParam', 'reccount') > 0) {
+                var selectedRowsArr = jQuery("#@Model.JGridName").jqGrid('getGridParam','selarrrow');
+                var selectedRows;
+                if (selectedRowsArr.length > 0)
+                    selectedRows = selectedRowsArr.join(',');
+                //console.log(selectedRowsArr);
+                //console.log(selectedRows);
+               // return;
+                  $.ajax({
+                      type: "POST",
+                      url: "@Url.Action("SaveDocument", "Home")",
+                    success: function (data) {
+                        // redirect to url
+                        window.location.replace(data);
+                    },
+                    data: {
+                        "documentId": $("#DocId").val(),
+                        "docNumber": $("#DocumentItem_Number").val(),
+                        "docCreatedOf": $("#createdOfDatepicker").datepicker("getDate").toJSONLocal(),
+                        "docComment": $("#DocumentItem_Comment").val(),
+                        "docIsComitted": $("#DocumentItem_IsCommitted").val(),
+                        "docContractorId": $("#ContractorDocId").val(),
+                        "docEmployeeId": $("#DocumentItem_Employee_UserId").val(),
+                        "docPlanDate": !$("#planDateDatepicker").val() ? null : $("#planDateDatepicker").datepicker("getDate").toJSONLocal(),
+                        "createRelatedDoc": createRelated,
+                        "selectedRowsIds": selectedRows,
+                        // get selected row ids
+                    }
+                });
+            }
+        }
+
+        $("#SaveDocument").click(function () {
+            saveDocumentPost(false);
+        });
+
+        $("#AddNewProduct").click(function () {
+            if ($("#Article").val()) {
+                if (!$("#PurchasePrice").val())
+                    $("#PurchasePrice").val(0);
+                if (!$("#MarginAbs").val())
+                    $("#MarginAbs").val(0);
+                if (!$("#Discount").val())
+                    $("#Discount").val(0);
+                if (!$("#Quantity").val())
+                    $("#Quantity").val(1);
+
+                // get quantitu=y from warehouse dropdown
+                var wElem = $("#warehouse-quantity-selector");
+                var wQuantity = 0;
+                if (wElem)
+                    wQuantity = wElem.val();
+
+                if (typeof wQuantity == 'undefined')
+                    wQuantity = 0;
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("AddNewProductLine", "Home")",
+                    success: function (data) {
+                        // set documentId field
+                        $("#DocId").val(data);
+
+                        jQuery("#@Model.JGridName").setGridParam({ postData: { documentId : data } }).trigger("reloadGrid");
+                        $("#Article").val('');
+                        $("#PurchasePrice").val(0);
+                  
+                        $("#Quantity").val(1);
+                        $("#ProductComment").val('');
+                        // удалить dropdown с выбором кол-ва сос склада
+                        deleteDropDownQuantity();
+                        // Set focus to contractor
+                        $("#ContractorCode").selectRange(0, $("#ContractorCode").val().length);
+                    },
+                    data: {
+                        "documentId": $("#DocId").val(),
+                        "docTypeId": "@Model.DocumentItem.DocumentTypeId",
+                        "docNumber": $("#DocumentItem_Number").val(),
+                        "docCreatedOf": $("#createdOfDatepicker").datepicker("getDate").toJSONLocal(),
+                        "docComment": $("#DocumentItem_Comment").val(),
+                        "supplierId": $("#SupplierId").val(),
+                        "article": $("#Article").val(),
+                        "purchaseprice": $("#PurchasePrice").val().replace('.', ','),
+                        "marginabs": $("#MarginAbs").val().replace('.', ','),
+                        "discount": $("#Discount").val().replace('.', ','),
+                        "quantity": $("#Quantity").val(),
+                        "quantityW":wQuantity,
+                        "comment": $("#ProductComment").val()
+                    }
+                });
+            }
+        });
+
+        // Отчёты
+        $("#Report").click(function(){
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetReportFileLink", "Home")",
+                      success: function (data) {
+                          // redirect to url
+                          window.location.replace(data);
+                      },
+                      data: {
+                          "documentId": $("#DocId").val(),
+                          "docNumber": $("#DocumentItem_Number").val(),
+                          "docCreatedOf": $("#createdOfDatepicker").datepicker("getDate").toJSONLocal(),
+                          "docComment": $("#DocumentItem_Comment").val(),
+                          "docContractorId": $("#ContractorDocId").val(),
+                          "docEmployeeId": $("#DocumentItem_Employee_UserId").val(),
+                          "docPlanDate": !$("#planDateDatepicker").val() ? null : $("#planDateDatepicker").datepicker("getDate").toJSONLocal(),
+                      }
+         });
+        });
+
+        $("#Article").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("GetProductByArticle", "Home")",
+                    data: {
+                        term: request.term,
+                        supplierId: $("#SupplierId").val(),
+                        count: 20
+                    },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    processdata: true,
+                    async: true,
+                    cache: false,
+                    success: function (data) {
+                        response(data);
+                    },
+                })
+            },
+            minLength: 2,
+            select: function (event, ui) {
+                $("#Article").val(ui.item.Article);
+                $("#PurchasePrice").val(ui.item.PurchasePrice);
+                $("#ProductComment").val(ui.item.Description);
+
+                // if quantity > 0 than item exists in warehouse
+                if (ui.item.Quantity > 0)
+                    createWarehouseQuantitySelection(ui.item.Quantity, true);
+                else
+                    deleteDropDownQuantity();
+
+                return false;
+            }
+        }).data("ui-autocomplete")._renderItem = function (ul, item) {
+            return $("<li>")
+            .append("<a>" + item.Article + "</a>")
+            .appendTo(ul);
+            //"<br>" + item.Name + item.SurName + 
+        };
+
+        function createWarehouseQuantitySelection(quantity){
+            var elem = $("#Quantity");
+                elem.width(30);
+                elem.val(0);
+                elem.after('<div id="warehouse-quantity-container" style="display:inline;"> взять со склада: ' + createDropDownQuantity(quantity, "warehouse-quantity-selector") + ' ед.</div>');
+        }
+
+        function deleteDropDownQuantity() {
+            var elem = $("#Quantity");
+            elem.val(1);
+            var elem1 = $("#warehouse-quantity-container");
+            if (elem1)
+                elem1.remove();
+        }
+
+        function createDropDownQuantity(maxValue, idName) {
+            var result = "<select id='" + idName + "'>";
+            var selected = '';
+            for (var i = 0; i <= maxValue; i++) {
+                selected = (i == maxValue) ? 'selected="selected"' : '';
+                result += "<option value='" + i + "' " + selected + ">" + i + "</option>";
+            }
+
+            result += "</select>";
+
+            return result;
+        }
+
+        $("#ContractorCode").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("GetSupplierByCode", "Reference")",
+                    data: { term: request.term, count: 20 },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    processdata: true,
+                    async: true,
+                    cache: false,
+                    success: function (data) {
+                        response(data);
+                    },
+                })
+            },
+            minLength: 2,
+            select: function (event, ui) {
+                deleteDropDownQuantity();
+                var text = "Добавить товар от фабрики: ";
+                $(".SupplierName").text(text + ui.item.Name + " (" + ui.item.Code + ")");
+                $("#SupplierId").val(ui.item.ContractorId);
+                $("#ContractorCode").val(ui.item.Code);
+                $("#ProductFields").css('visibility', 'visible').hide().fadeIn('slow');
+                return false;
+            }
+        }).data("ui-autocomplete")._renderItem = function (ul, item) {
+            return $("<li>")
+            .append("<a>" + item.Code + "</a>")
+            .appendTo(ul);
+        };
+
+        $("#ContractorDoc").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("GetContractorByCode", "Home")",
+                    data: { term: request.term, count: 20 },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    processdata: true,
+                    async: true,
+                    cache: false,
+                    success: function (data) {
+                        response(data);
+                    },
+                })
+            },
+             minLength: 2,
+             select: function (event, ui) {
+                 var text = "";
+                 $("label[for='ContractorDoc']").text(text + ui.item.Name + " (" + ui.item.Code + ")");
+                 $("#ContractorDocId").val(ui.item.ContractorId);
+                 $("#ContractorDoc").val(ui.item.Code);
+                 $("#MarginAbs").val(ui.item.MarginAbs);
+                 updateDocumentTitle();
+                 return false;
+             }
+         }).data("ui-autocomplete")._renderItem = function (ul, item) {
+             return $("<li>")
+             .append("<a>" + item.Code + "</a>")
+             .appendTo(ul);
+             //"<br>" + item.Name + item.SurName + 
+         };
+
+        $('#fileupload').fileupload({
+            dataType: 'json',
+            url: '/Home/Document?doctypeId=@Model.DocumentItem.DocumentTypeId',
+            done: function (e, data) {
+                //console.log(data.result);
+                if (data.result.documentId <= 0) {
+                    alert(data.result.message);
+                }
+                else {
+                    $("#DocId").attr('value', data.result.documentId);
+                    jQuery("#@Model.JGridName").setGridParam({ postData: { documentId: data.result.documentId } }).trigger("reloadGrid");
+                }
+            }
+        });
+        $('#fileupload').bind('fileuploadsubmit', function (e, data) {
+            // The example input, doesn't have to be part of the upload form:
+            var contractorDocId = $("#ContractorDocId");
+            var docNumber = $("#DocumentItem_Number");
+            var docCreatedOf = $("#createdOfDatepicker");
+            data.formData = {
+                contractorId: contractorDocId.val(),
+                docNumber: docNumber.val(),
+                documentId: $("#DocId").val(),
+                docCreatedOf: docCreatedOf.datepicker("getDate").toJSONLocal()
+            };
+        });
+
+        // Custom jqgrid summary function
+        function customSummaryFunc(val, name, record) {
+           
+            return parseFloat(val || 0) + parseFloat((record[name] || 0));
+        }
+
+        function updateDocumentTitle() {
+            document.title = $("#ContractorDoc").val() + " - " + document.title;
+        }
+
+        updateDocumentTitle();
+
+        // jquery extension to focus on element
+        $.fn.selectRange = function (start, end) {
+            if (!end) end = start;
+            return this.each(function () {
+                if (this.setSelectionRange) {
+                    this.focus();
+                    this.setSelectionRange(start, end);
+                } else if (this.createTextRange) {
+                    var range = this.createTextRange();
+                    range.collapse(true);
+                    range.moveEnd('character', end);
+                    range.moveStart('character', start);
+                    range.select();
+                }
+            });
+        };
+    });
+</script>

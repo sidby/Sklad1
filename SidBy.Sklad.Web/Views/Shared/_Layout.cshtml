@@ -8,26 +8,91 @@
         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
         <meta name="viewport" content="width=device-width" />
         @Styles.Render("~/Content/css")
+        @Styles.Render("~/Content/themes/redmond/css")
+        @Styles.Render("~/Content/themes/jqgrid/css")
         @Scripts.Render("~/bundles/modernizr")
+        @Scripts.Render("~/bundles/jquery")
+        @Scripts.Render("~/bundles/fileupload")
+
     </head>
     <body>
         <header>
             <div class="content-wrapper">
                 <div class="float-left">
-                    <p class="site-title">@Html.ActionLink(_LayoutStrings.Logo, "Index", "Home")</p>
+                    <p class="site-title">@Html.ActionLink(_LayoutStrings.Logo, "Index", "Indicators")</p>
                 </div>
                 <div class="float-right">
                     <section id="login">
                         @Html.Partial("_LoginPartial")
                     </section>
-                    <nav>
+                </div>
+                <div class="clear-both"></div>
+                @if (User.IsInRole("employee") || User.IsInRole("admin"))
+                {
+                <div id="sklad-nav-outer">
+                    <nav id="sklad-nav-tabs" class="no-border">
+                        <ul>
+                        <li><a href="#sklad-nav-tabs-1">Моя компания</a></li>
+                       @* <li><a href="#sklad-nav-tabs-2">Закупки</a></li>*@
+                        <li><a href="#sklad-nav-tabs-3">Продажи</a></li>
+                        <li><a href="#sklad-nav-tabs-4">Склад</a></li>
+                        <li><a href="#sklad-nav-tabs-5">Справочники</a></li>
+                        </ul>
+                        <div id="sklad-nav-tabs-1">
+                            <ul class="sklad-nav-links">
+                                <li>@Html.ActionLink("Показатели", "Index", "Indicators")</li>
+                                @*<li>@Html.ActionLink("Юр. лица", "LegalEntity", "MyCompany")</li>*@
+                                <li>@Html.ActionLink("Контакты", "MyEmployees", "MyCompany")</li>
+                              @*  <li>@Html.ActionLink("Склады", "Warehouse", "MyCompany")</li>*@
+                                <li><a href="#">Документы</a></li>
+                            </ul>
+                        </div>
+                       @* <div id="sklad-nav-tabs-2">
+                            <ul class="sklad-nav-links">
+                                <li><a href="#">Заказы поставщикам</a></li>
+                                <li><a href="#">Приёмки</a></li>
+                                <li><a href="#">Возвраты поставщикам</a></li>
+                            </ul>
+                        </div>*@
+                        <div id="sklad-nav-tabs-3">
+                            <ul class="sklad-nav-links">
+                                <li>@Html.ActionLink("Заказы покупателей", "CustomerOrders", "Sale")</li>
+                                <li>@Html.ActionLink("Отгрузки", "Shipment", "Sale")</li>
+                                <li>@Html.ActionLink("Возвраты покупателей", "Refunds", "Sale")</li>
+                                <li><a href="#"><i>Прибыльность</i></a></li>
+                                <li><a href="#"><i>Задолженность</i></a></li>
+                            </ul>
+                        </div>
+                        <div id="sklad-nav-tabs-4">
+                            <ul class="sklad-nav-links">
+                                <li>@Html.ActionLink("Списания", "Cancellation", "Warehouse")</li>
+                                <li>@Html.ActionLink("Оприходования", "Posting", "Warehouse")</li>
+                                <li><a href="#"><i>Остатки</i></a></li>
+                                <li><a href="#"><i>Обороты</i></a></li>
+                            </ul>
+                        </div>
+                        <div id="sklad-nav-tabs-5">
+                            <ul class="sklad-nav-links">
+                                <li>@Html.ActionLink("Товары", "Product", "Reference")</li>
+                                @*<li><a href="#">Серии</a></li>*@
+                                <li>@Html.ActionLink("Контрагенты", "Contractor", "Reference")</li>
+                                @*<li>@Html.ActionLink("Регион", "Region", "Reference")</li>*@
+                                @*<li><a href="#">Валюты</a></li>*@
+                                <li><a href="#">Договоры</a></li>
+                            </ul>
+                        </div>
+                    </nav>
+                 </div>
+                }
+
+                @*    <nav>
                         <ul id="menu">
                             <li>@Html.ActionLink(_LayoutStrings.Home, "Index", "Home")</li>
                             <li>@Html.ActionLink(_LayoutStrings.About, "About", "Home")</li>
                             <li>@Html.ActionLink(_LayoutStrings.Contact, "Contact", "Home")</li>
                         </ul>
-                    </nav>
-                </div>
+                    </nav>*@
+              
             </div>
         </header>
         <div id="body">
@@ -44,7 +109,11 @@
             </div>
         </footer>
 
-        @Scripts.Render("~/bundles/jquery")
+    
+        @Scripts.Render("~/bundles/jqueryui")
+        @Scripts.Render("~/bundles/jqgrid")
+   
+        @Scripts.Render("~/bundles/skladui")
         @RenderSection("scripts", required: false)
     </body>
 </html>

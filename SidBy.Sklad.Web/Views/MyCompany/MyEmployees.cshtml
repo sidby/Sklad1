@@ -1,0 +1,6 @@
+﻿@model SidBy.Sklad.Web.Models.SkladJqGridModel
+@using SidBy.Sklad.Web.Models
+@using Trirand.Web.Mvc
+
+@Html.Partial("_JqGridStandart", new JqGridViewParamsModel() { 
+    Grid = Model.MyEmployeesGrid, GridId = "MyEmployeesGrid1", Title = @ViewBag.Title})

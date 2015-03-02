@@ -1,0 +1,122 @@
+﻿@model SidBy.Sklad.Web.Models.SkladJqGridModel
+@using SidBy.Sklad.Web.Models
+@using Trirand.Web.Mvc
+
+@{
+    string jqGridProductListId = "ProductList1";    
+}
+
+@Html.Trirand().JQAutoComplete(new JQAutoComplete { 
+     AutoCompleteMode = AutoCompleteMode.BeginsWith,
+        DataUrl = Url.Action("GetSupplierByCodeAutoComplete", "Reference"),
+        DataField = "Code",
+        ID = "ContractorId",
+        //DataSource = (new SidBy.Sklad.DataAccess.SkladDataContext()).Contractors.Where(x => x.ContractorTypeId == 
+        //    (int)SidBy.Sklad.Domain.Enums.EntityEnum.ContractorTypeEnum.Factory),
+        DisplayMode = AutoCompleteDisplayMode.ControlEditor,
+        MinLength = 2,  
+}, "SupplierAutoComplete")
+
+@Html.Trirand().JQGrid(Model.ProductGrid, jqGridProductListId)
+
+
+
+@*// *@
+
+<h2>Добавить новый товар</h2>
+<label for="ContractorCode">Код фабрики</label>
+<input type="text" id="ContractorCode" name="ContractorCode" />
+<h3 class="SupplierName"></h3>
+<input type="hidden" id="SupplierId" name="SupplierId" />
+<div id="ProductFields" style="visibility:hidden;">
+<fieldset>
+    <legend>Создать товар</legend>
+    <ol>
+        <li>
+            <label for="Article">Артикул</label>
+            <input type="text" id="Article" name="Article" />
+        </li>
+
+        <li>
+            <label for="PurchasePrice">Цена закупки</label>
+            <input type="text" id="PurchasePrice" name="PurchasePrice" />
+        </li>
+        <li>
+            <label for="SalePrice">Цена продажи</label>
+            <input type="text" id="SalePrice" name="SalePrice" />
+        </li>
+        <li>
+            <label for="VAT">НДС, %</label>
+            <input type="text" id="VAT" name="VAT" />
+        </li>
+       
+    </ol>
+    <button id="AddNewProduct" name="AddNewProduct">Создать</button>
+</fieldset>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#AddNewProduct").click(function () {
+            if ($("#Article").val()) {
+                if (!$("#PurchasePrice").val())
+                    $("#PurchasePrice").val(0);
+                if (!$("#SalePrice").val())
+                    $("#SalePrice").val(0);
+                if (!$("#VAT").val())
+                    $("#VAT").val(0);
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("AddNewProduct", "Reference")",
+                    success: function (data) {
+                        jQuery("#@jqGridProductListId").trigger("reloadGrid");
+                        $("#Article").val(''),
+                        $("#PurchasePrice").val(''),
+                        $("#SalePrice").val(''),
+                        $("#VAT").val('')
+                    },
+                    data: {
+                        "contractorId": $("#SupplierId").val(),
+                        "article": $("#Article").val(),
+                        "purchaseprice": $("#PurchasePrice").val(),
+                        "saleprice": $("#SalePrice").val(),
+                        "vat": $("#VAT").val()
+                    }
+                });
+            }
+        });
+
+        $("#ContractorCode").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("GetSupplierByCode", "Reference")",
+                    data: { term: request.term, count: 20 },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    processdata: true,
+                    async: true,
+                    cache: false,
+                    success: function (data) {
+                        response(data);
+                    },
+                })
+            },
+            minLength: 2,
+            select: function (event, ui) {
+                var text = "Добавить товар от фабрики: ";
+                $(".SupplierName").text(text + ui.item.Name + " (" + ui.item.Code + ")");
+                $("#SupplierId").val(ui.item.ContractorId);
+                $("#ContractorCode").val(ui.item.Code);
+                $("#ProductFields").css('visibility','visible').hide().fadeIn('slow');;
+                return false;
+            }
+        }).data("ui-autocomplete")._renderItem = function (ul, item) {
+            return $("<li>")
+            .append("<a>" + item.Code + "</a>")
+            .appendTo(ul);
+            //"<br>" + item.Name + item.SurName + 
+        };
+
+    });
+</script>
