@@ -982,11 +982,16 @@ namespace SidBy.Sklad.Web.Controllers
 
                     x.SupplierId == contractor.ContractorId)
                     .GroupBy(x => x.DocumentId).Select(k => k.Key).ToArray();
+
+                if (periodTo == null)
+                    periodTo = DateTime.MaxValue;
+
                 if (!refundsShipmentOnly)
                     documentSet = datacontextModel.Documents.Where(x => documentIds.Contains(x.DocumentId) && x.CreatedOf >= periodFrom && x.CreatedOf <= periodTo);
                 else
                     documentSet = datacontextModel.Documents.Where(x => documentIds.Contains(x.DocumentId) && x.CreatedOf >= periodFrom && x.CreatedOf <= periodTo
                         && (x.DocumentTypeId == (int)EntityEnum.DocumentTypeEnum.Refunds || x.DocumentTypeId == (int)EntityEnum.DocumentTypeEnum.Shipment));
+
             }
             else
             {   if(!refundsShipmentOnly)
