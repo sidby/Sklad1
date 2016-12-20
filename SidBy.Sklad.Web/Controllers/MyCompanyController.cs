@@ -948,7 +948,6 @@ namespace SidBy.Sklad.Web.Controllers
             //grid.ToolBarSettings.ShowAddButton = false;
             //grid.ToolBarSettings.ShowEditButton = false;
         }
-
         #endregion
 
         private void SetUpGrid(JQGrid grid, string gridID, string dataUrl, string editUrl)
