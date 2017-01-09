@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BackupService.cs" />
     <Compile Include="DebugDatabaseInitializer.cs" />
     <Compile Include="LoggingDataContext.cs" />
     <Compile Include="Mappings\ContactMap.cs" />

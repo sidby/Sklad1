@@ -213,6 +213,8 @@
     <Compile Include="BL\ReportHelper.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AdministrationController.cs" />
+    <Compile Include="Controllers\BaseSidController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\IndicatorsController.cs" />
     <Compile Include="Controllers\MyCompanyController.cs" />
@@ -315,6 +317,8 @@
     </Compile>
     <Compile Include="Migration\SkladDataContextMigrationConfiguration.cs" />
     <Compile Include="Models\AccountModels.cs" />
+    <Compile Include="Models\BackupFileModel.cs" />
+    <Compile Include="Models\BackupModel.cs" />
     <Compile Include="Models\ContactListModel.cs" />
     <Compile Include="Models\ContractorDetailsModel.cs" />
     <Compile Include="Models\DocumentProductLineModel.cs" />
@@ -770,9 +774,11 @@
     <Content Include="Views\Shared\_JqGridDocumentPartial.cshtml" />
     <Content Include="Views\Home\Document.cshtml" />
     <Content Include="Views\Shared\_SearchProductPartial.cshtml" />
+    <Content Include="Views\Administration\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="backups\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

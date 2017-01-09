@@ -20,6 +20,16 @@ namespace SidBy.Sklad.Web
 
     public class MvcApplication : System.Web.HttpApplication
     {
+        //Application_BeginRequest
+        protected void Application_BeginRequest()
+        {
+            if (!Request.IsLocal && !Request.IsSecureConnection)
+            {
+                string sUrl = Request.Url.ToString().Replace("http:", "https:");
+                Response.Redirect(sUrl);
+            }
+        }
+
         protected void Application_Start()
         {
             log4net.Config.XmlConfigurator.Configure();
@@ -37,8 +47,6 @@ namespace SidBy.Sklad.Web
             Database.SetInitializer(new MigrateDatabaseToLatestVersion<SkladDataContext, SkladDataContextMigrationConfiguration>());
             // DebugDatabaseInitializer
 
-
-
             //context.LegalEntities.Add(new LegalEntity() { Name = "Трикотажный ряд", IsVATPayer = true });
             //context.SaveChanges();
 
@@ -46,7 +54,8 @@ namespace SidBy.Sklad.Web
             {
                 WebSecurity.InitializeDatabaseConnection("DefaultConnection", "UserProfile", "UserId", "UserName", autoCreateTables: true);
             }
-           //UsersContextUsersContext.Database.SetInitializer(new MigrateDatabaseToLatestVersion<UsersContext, UsersContextMigrationConfiguration>());
+
+            //UsersContextUsersContext.Database.SetInitializer(new MigrateDatabaseToLatestVersion<UsersContext, UsersContextMigrationConfiguration>());
             // trigger the database init strategy with a read
             //new UsersContext().UserProfiles.Find(1);
         }
