@@ -12,6 +12,5 @@ D:\coding\Sklad\SidBy.Common\obj\Debug\SidBy.Common.dll
 D:\coding\Sklad\SidBy.Common\obj\Debug\SidBy.Common.pdb
 D:\coding\Sklad1\SidBy.Common\bin\Debug\SidBy.Common.dll
 D:\coding\Sklad1\SidBy.Common\bin\Debug\SidBy.Common.pdb
-D:\coding\Sklad1\SidBy.Common\obj\Debug\SidBy.Common.csprojResolveAssemblyReference.cache
 D:\coding\Sklad1\SidBy.Common\obj\Debug\SidBy.Common.dll
 D:\coding\Sklad1\SidBy.Common\obj\Debug\SidBy.Common.pdb

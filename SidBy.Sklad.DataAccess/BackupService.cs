@@ -29,9 +29,98 @@ namespace SidBy.Sklad.DataAccess
             }
         }
 
-        public void BackupDatabase(string databaseName)
+        /*
+         USE master;
+GO
+ALTER DATABASE AMOD SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+Once you've finished restoring and the database is ready for use again:
+
+ALTER DATABASE AMOD SET MULTI_USER;
+             */
+
+        private void SingleUserOwn(string databaseName)
         {
-            string filePath = BuildBackupPathWithFilename(databaseName);
+            try
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    // WITH INIT - backup file should be overwritten 
+                    var query = String.Format(@"ALTER DATABASE [{0}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE", databaseName);
+
+                    using (var command = new SqlCommand(query, connection))
+                    {
+                        connection.Open();
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                var fd = ex;
+            }
+        }
+
+        private void MultiUserOwn(string databaseName)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    // WITH INIT - backup file should be overwritten 
+                    var query = String.Format(@"
+
+ALTER DATABASE [{0}] SET MULTI_USER", databaseName);
+
+                    using (var command = new SqlCommand(query, connection))
+                    {
+                        connection.Open();
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                var df = ex;
+            }
+        }
+
+        /// <summary>
+        /// RestoreDatabase.
+        /// Login should be dbcreator server role
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <param name="filePath"></param>
+        public void RestoreDatabase(string databaseName, string filePath)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+
+                    using (var command = new SqlCommand())
+                    {
+                        command.CommandText = String.Format(@"ALTER DATABASE [{0}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; RESTORE DATABASE [{0}] FROM DISK = @filePath  WITH REPLACE; ALTER DATABASE [{0}] SET MULTI_USER ", databaseName);
+                        command.Parameters.Add("@filePath", SqlDbType.NVarChar, 4000).Value = filePath;
+                        command.CommandType = CommandType.Text;
+                        command.Connection = connection;
+
+                        connection.Open();
+                        command.ExecuteNonQuery();
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+              
+            }
+
+            //MultiUserOwn(databaseName);
+        }
+
+        public void BackupDatabase(string databaseName, string prefix = "")
+        {
+            string filePath = BuildBackupPathWithFilename(databaseName, prefix);
 
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -74,9 +163,9 @@ namespace SidBy.Sklad.DataAccess
             return databases;
         }
 
-        private string BuildBackupPathWithFilename(string databaseName)
+        private string BuildBackupPathWithFilename(string databaseName, string prefix)
         {
-            string filename = string.Format("{0}-{1}.bak", databaseName, DateTime.Now.ToString("yyyy-MM-dd"));
+            string filename = string.Format("{0}-{1}.bak", databaseName + prefix, DateTime.Now.ToString("yyyy-MM-dd"));
 
             return Path.Combine(_backupFolderFullPath, filename);
         }

@@ -15,10 +15,10 @@
 
 <div>
     <h2>Резервное копирование базы данных (БД)</h2>
+    <br />
     <button id="createFullBackup">Сделать полную копию БД</button>
     <input type="hidden" value="@userId" name="userId" id="userId" />
-    <label style="display:inline;" for="monthReportFromDate">Отчёт за месяц</label>
-    <input name="monthReportFromDate" id="monthReportFromDate" style="width:80px;display:inline;" class="date-picker" />
+
 
     @{
         string[] roles = Roles.GetRolesForUser(WebSecurity.CurrentUserName);
@@ -27,21 +27,6 @@
     <div id="backupFileListContainer" class="reportcontainer"></div>
 
    
-    <input name="halfYearReportFromDate" id="halfYearReportFromDate" style="width:80px;display:inline;" class="date-picker" />
-    <input name="halfYearReportToDate" id="halfYearReportToDate" style="width:80px;display:inline;" class="date-picker" />
-        <button id="printHalfYearReport">Печать отчёта</button>
-    
-    <div id="halfYearReportContainer" class="employeesToSelectList"></div>
-
-    <label style="display:inline;" for="contractorReportFromDate">Статистика по контрагентам</label>
-
-    <input name="contractorReportFromDate" id="contractorReportFromDate" style="width:80px;display:inline;" class="date-picker" />
-    <input name="contractorReportToDate" id="contractorReportToDate" style="width:80px;display:inline;" class="date-picker" />
-
-    <button id="printContractorReport">Экспорт в Excel</button>
-    <button id="loadContractorReport">Загрузить отчёт</button>
-
-    <div id="contractorReportContainer" class="reportcontainer"></div>
 </div>
 
 <script id="backupFilesTemplate" type="text/x-jsrender">
@@ -56,14 +41,18 @@
 
         </thead>
         <tbody>
-            {{for Files }}
+            @*result.RelativeUrl = backupFolder;*@
+            {{for Files  ~backupFolder=RelativeUrl }}
             <tr class="{{:#index%2 ? 'even' : 'odd'}}">
                 <td>
-                    {{>FileName}}
+                    <a href="/{{>~backupFolder}}/{{>FileName}}">{{>FileName}}</a>
                 </td>
                 <td>{{>~getDate(Modified)}} </td>
+               <td>
+               <button data-filename="{{>FileName}}" class="deleteBackup">Удалить</button>
+                </td>
                 <td>
-                    <a target="_blank" href="#"></a>
+                    <button data-filename="{{>FileName}}" class="restoreBackup">Восстановить</button>
                 </td>
             </tr>
             {{/for}}
@@ -78,6 +67,42 @@
             function formatDate(date) {
                 ("0" + date.getDate()).slice(-2) + '.' + ("0" + (date.getMonth() + 1)).slice(-2) +
                 '.' + date.getFullYear();
+            }
+
+            $(document).on("click", '.deleteBackup', function () {
+                //do stuff
+                var filename = $(this).data("filename");
+                if (confirm('Вы действительно хотите удалить ' + filename + '?')) {
+                    operateBackup(0, filename);
+                }
+            });
+
+            $(document).on("click", '.restoreBackup', function () {
+                var filename = $(this).data("filename");
+
+                if (confirm('Вы действительно хотите восстановить базу из ' + filename + '?')) {
+                    operateBackup(1, filename);
+                }
+            });
+            
+
+            function operateBackup(operation, filename) {
+                var postData = {
+                    operation: operation * 1,
+                    filename: filename
+                };
+
+                $.ajax({
+                    type: 'post',
+                    url: '@Url.Action("OperateBackup")',
+                    data: JSON.stringify(postData),
+                    contentType: "application/json; charset=utf-8",
+                    traditional: true,
+                    success: function () {
+                        getBackupFiles();
+                        return false;
+                    }
+                });
             }
 
             $("#createFullBackup").button().click(function () {
@@ -100,6 +125,7 @@
                     traditional: true,
                     success: function () {
                         getBackupFiles();
+                        $("#createFullBackup").children().first().text("Резервная копия создана");
                         return false;
                     }
                 });

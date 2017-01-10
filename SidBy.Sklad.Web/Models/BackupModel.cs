@@ -8,5 +8,7 @@ namespace SidBy.Sklad.Web.Models
     public class BackupModel
     {
         public List<BackupFileModel> Files { get; set; }
+
+        public string RelativeUrl { get; set; }
     }
 }
