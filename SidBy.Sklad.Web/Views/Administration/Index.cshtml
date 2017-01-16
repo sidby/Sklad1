@@ -19,14 +19,12 @@
     <button id="createFullBackup">Сделать полную копию БД</button>
     <input type="hidden" value="@userId" name="userId" id="userId" />
 
-
     @{
         string[] roles = Roles.GetRolesForUser(WebSecurity.CurrentUserName);
     }
 
     <div id="backupFileListContainer" class="reportcontainer"></div>
 
-   
 </div>
 
 <script id="backupFilesTemplate" type="text/x-jsrender">
@@ -84,7 +82,6 @@
                     operateBackup(1, filename);
                 }
             });
-            
 
             function operateBackup(operation, filename) {
                 var postData = {
@@ -159,7 +156,6 @@
                     }));
                 }
             }
-
 
             //function formatDate(date) {
             //    ("0" + date.getDate()).slice(-2) + '.' + ("0" + (date.getMonth() + 1)).slice(-2) +
