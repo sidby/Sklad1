@@ -64,10 +64,10 @@ namespace SidBy.Sklad.Web.Controllers
           int monthFromNumber, int yearFromNumber,
           int monthToNumber, int yearToNumber)
         {
+            BackupDB(Session.LCID.ToString());
+
             var service = new DataBulkOperationsService(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString);
             service.DeleteDocumentsByPeriod(monthFromNumber,  yearFromNumber, monthToNumber,  yearToNumber);
-
-     
 
             var jsonResult = new JsonResult { JsonRequestBehavior = JsonRequestBehavior.AllowGet, Data = "Данные удалены" };
             return jsonResult;

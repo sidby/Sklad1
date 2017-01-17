@@ -29,24 +29,19 @@ namespace SidBy.Sklad.DataAccess
             {
                 using (var connection = new SqlConnection(_connectionString))
                 {
-
                     using (var command = new SqlCommand())
                     {
-
-                        //The DELETE statement conflicted with the SAME TABLE REFERENCE constraint "FK_dbo.Document_dbo.Document_ParentDocumentId". The conflict occurred in database "Sklad", table "dbo.Document", column 'ParentDocumentId'.
-
-
-                        command.CommandText = String.Format(@"
-                         UPDATE Document SET Comment ='deleted' WHERE CreatedOf >= '" + yearMonthFrom + "' AND CreatedOf < '" + yearMonthTo + "' ");
-                        //    "SELECT AND CreatedOf >= '" + yearMonthFrom + "' AND CreatedOf < '" + yearMonthTo + "' " +
-
+                        command.CommandText = String.Format(@"DELETE FROM dbo.Document WHERE 
+                            dbo.Document.ParentDocumentId IN (SELECT DocumentId FROM Document WHERE CreatedOf >= @yearMonthFrom AND CreatedOf < @yearMonthTo) 
+                            DELETE FROM dbo.Document WHERE dbo.Document.DocumentId IN (SELECT DocumentId FROM Document Where CreatedOf  >= @yearMonthFrom AND CreatedOf < @yearMonthTo) ");
+                        command.Parameters.Add("@yearMonthFrom", SqlDbType.DateTime).Value = yearMonthFrom;
+                        command.Parameters.Add("@yearMonthTo", SqlDbType.DateTime).Value = yearMonthTo;
                         command.CommandType = CommandType.Text;
                         command.Connection = connection;
 
                         connection.Open();
                         command.ExecuteNonQuery();
                     }
-
                 }
             }
             catch (Exception ex)
