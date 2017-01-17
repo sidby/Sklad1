@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackupService.cs" />
+    <Compile Include="DataBulkOperationsService.cs" />
     <Compile Include="DebugDatabaseInitializer.cs" />
     <Compile Include="LoggingDataContext.cs" />
     <Compile Include="Mappings\ContactMap.cs" />

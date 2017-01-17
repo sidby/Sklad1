@@ -60,6 +60,19 @@ namespace SidBy.Sklad.Web.Controllers
                 service.RestoreDatabase(database, filePath);
         }
 
+        public JsonResult DeleteData(
+          int monthFromNumber, int yearFromNumber,
+          int monthToNumber, int yearToNumber)
+        {
+            var service = new DataBulkOperationsService(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString);
+            service.DeleteDocumentsByPeriod(monthFromNumber,  yearFromNumber, monthToNumber,  yearToNumber);
+
+     
+
+            var jsonResult = new JsonResult { JsonRequestBehavior = JsonRequestBehavior.AllowGet, Data = "Данные удалены" };
+            return jsonResult;
+        }
+
         public JsonResult OperateBackup(int operation, string filename)
         {
             if (String.IsNullOrEmpty(filename))
@@ -122,6 +135,36 @@ namespace SidBy.Sklad.Web.Controllers
             var jsonResult = new JsonResult { JsonRequestBehavior = JsonRequestBehavior.AllowGet, Data = result };
 
             return jsonResult;
+        }
+
+        [HttpPost]
+        public ActionResult DbUpload(IEnumerable<HttpPostedFileBase> files)
+        {
+            foreach (var file in files)
+            {
+                if (file.ContentLength > 0)
+                {
+                    //Stream uploadFileStream = file.InputStream;
+                    if (file.FileName.EndsWith("bak"))
+                    {
+                        string backupFolder = ConfigurationManager.AppSettings["BackupFolder"];
+                        string path = Path.Combine(Server.MapPath("~"), backupFolder);
+
+                        var filename = Path.Combine(path, file.FileName);
+
+                        file.SaveAs(filename);
+                        logger.InfoFormat("Загружен файл БД:{0}", file.FileName);
+
+                        return Json(new { message = "Файл успешно обновлен/добавлен" });
+                    }
+                    else
+                    {
+                        return Json(new { message = "Вы можете загружать только файлы бэкапа БД!", error = 1 });
+                    }
+                }
+            }
+               
+            return Json(new { message = "Возникла критическая ошибка!", error = 1 });
         }
     }
 }

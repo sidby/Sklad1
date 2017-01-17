@@ -29,15 +29,6 @@ namespace SidBy.Sklad.DataAccess
             }
         }
 
-        /*
-         USE master;
-GO
-ALTER DATABASE AMOD SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-Once you've finished restoring and the database is ready for use again:
-
-ALTER DATABASE AMOD SET MULTI_USER;
-             */
-
         private void SingleUserOwn(string databaseName)
         {
             try
@@ -54,9 +45,9 @@ ALTER DATABASE AMOD SET MULTI_USER;
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                var fd = ex;
+           
             }
         }
 

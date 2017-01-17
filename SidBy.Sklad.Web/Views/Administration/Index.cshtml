@@ -17,6 +17,8 @@
     <h2>Резервное копирование базы данных (БД)</h2>
     <br />
     <button id="createFullBackup">Сделать полную копию БД</button>
+    <label style="display:inline;">Загрузить файл БД:</label> <input id="fileupload" type="file" style="width:130px;" name="files" multiple="multiple" />
+
     <input type="hidden" value="@userId" name="userId" id="userId" />
 
     @{
@@ -25,6 +27,12 @@
 
     <div id="backupFileListContainer" class="reportcontainer"></div>
 
+
+    <label style="display:inline;" for="dataDeletionFromDate">Удаление данных с</label>
+
+  <input name="dataDeletionFromDate" id="dataDeletionFromDate" style="width:80px;display:inline;" class="date-picker" />
+  по  <input name="dataDeletionToDate" id="dataDeletionToDate" style="width:80px;display:inline;" class="date-picker" />
+    <button id="dataDeletion" name="dataDeletion">Удалить</button>
 </div>
 
 <script id="backupFilesTemplate" type="text/x-jsrender">
@@ -40,7 +48,7 @@
         </thead>
         <tbody>
             @*result.RelativeUrl = backupFolder;*@
-            {{for Files  ~backupFolder=RelativeUrl }}
+            {{for Files ~backupFolder=RelativeUrl }}
             <tr class="{{:#index%2 ? 'even' : 'odd'}}">
                 <td>
                     <a href="/{{>~backupFolder}}/{{>FileName}}">{{>FileName}}</a>
@@ -109,6 +117,45 @@
                 createFullBackup();
             });
 
+            $("#dataDeletion").button().click(function () {
+                var fromDateM = getMonthYear($("#dataDeletionFromDate"), 1);
+                var toDateM = getMonthYear($("#dataDeletionToDate"));
+
+                var postData = {
+                    monthFromNumber: fromDateM.Month,
+                    yearFromNumber: fromDateM.Year,
+                    monthToNumber: toDateM.Month,
+                    yearToNumber: toDateM.Year,
+                };
+
+                if ((postData.yearFromNumber * 12 + postData.monthFromNumber) >=
+                    (postData.yearToNumber * 12 + postData.monthToNumber)) {
+                    alert('Выберите даты с и по');
+                    return;
+                }
+
+                if (confirm('Вы действительно хотите удалить даннные с ' +
+                    postData.monthFromNumber + '.' + postData.yearFromNumber + ' по ' +
+                    postData.monthToNumber + '.' + postData.yearToNumber + ' ?')) {
+                    var that = $(this);
+                    that.prop("disabled", true);
+                    that.children().first().text("Данные удаляются...");
+
+                    $.ajax({
+                        type: 'post',
+                        url: '@Url.Action("DeleteData")',
+                        data: JSON.stringify(postData),
+                        contentType: "application/json; charset=utf-8",
+                        traditional: true,
+                        success: function (data) {
+                            alert(data);
+                            return false;
+                        }
+                    });
+                }
+
+            });
+
             function createFullBackup() {
                 var postData = {
                     employeeId: $("#userId").val() * 1
@@ -157,146 +204,6 @@
                 }
             }
 
-            //function formatDate(date) {
-            //    ("0" + date.getDate()).slice(-2) + '.' + ("0" + (date.getMonth() + 1)).slice(-2) +
-            //    '.' + date.getFullYear();
-            //}
-
-            $("#monthReportFromDate").datepicker({
-                changeMonth: true,
-                changeYear: true,
-                showButtonPanel: true,
-                dateFormat: 'mm.yy',
-                defaultDate: new Date(),
-                onClose: function (dateText, inst) {
-                    var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
-                    var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
-                    $(this).val($.datepicker.formatDate('mm.yy', new Date(year, month, 1)));
-
-                    updateMonthReport();
-                }
-            });
-
-            $("#monthReportFromDate").focus(function () {
-                $(".ui-datepicker-calendar").hide();
-                $("#ui-datepicker-div").position({
-                    my: "center top",
-                    at: "center bottom",
-                    of: $(this)
-                });
-            });
-
-            $("#employeesMonthReport").change(function () {
-                updateMonthReport();
-            });
-
-
-            $("#halfYearReportFromDate").datepicker({
-                changeMonth: true,
-                changeYear: true,
-                showButtonPanel: true,
-                dateFormat: 'mm.yy',
-                defaultDate: new Date((new Date()).getFullYear(), 0, 1),
-                onClose: function (dateText, inst) {
-                    var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
-                    var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
-                    $(this).val($.datepicker.formatDate('mm.yy', new Date(year, month, 1)));
-
-                    updateHalfYearReport();
-                }
-            });
-
-            $("#halfYearReportToDate").datepicker({
-                changeMonth: true,
-                changeYear: true,
-                showButtonPanel: true,
-                dateFormat: 'mm.yy',
-                defaultDate: new Date(),
-                onClose: function (dateText, inst) {
-                    var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
-                    var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
-                    $(this).val($.datepicker.formatDate('mm.yy', new Date(year, month, 1)));
-                    //$(this).datepicker('setDate', new Date(year, month, 1));
-                    updateHalfYearReport();
-                }
-            });
-
-            $("#employeesHalfYearReport").change(function () {
-                updateHalfYearReport();
-            });
-
-            $("#halfYearReportFromDate").focus(function () {
-                $(".ui-datepicker-calendar").hide();
-                $("#ui-datepicker-div").position({
-                    my: "center top",
-                    at: "center bottom",
-                    of: $(this)
-                });
-            });
-
-            $("#halfYearReportToDate").focus(function () {
-                $(".ui-datepicker-calendar").hide();
-                $("#ui-datepicker-div").position({
-                    my: "center top",
-                    at: "center bottom",
-                    of: $(this)
-                });
-            });
-
-            $("#contractorReportFromDate").datepicker({
-                changeMonth: true,
-                changeYear: true,
-                showButtonPanel: true,
-                dateFormat: 'mm.yy',
-                defaultDate: new Date((new Date()).getFullYear(), 0, 1),
-                onClose: function (dateText, inst) {
-                    var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
-                    var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
-                    $(this).val($.datepicker.formatDate('mm.yy', new Date(year, month, 1)));
-
-                    updateContractorReport();
-                }
-            });
-
-            $("#contractorReportToDate").datepicker({
-                changeMonth: true,
-                changeYear: true,
-                showButtonPanel: true,
-                dateFormat: 'mm.yy',
-                defaultDate: new Date(),
-                onClose: function (dateText, inst) {
-                    var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
-                    var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
-                    $(this).val($.datepicker.formatDate('mm.yy', new Date(year, month, 1)));
-                    //$(this).datepicker('setDate', new Date(year, month, 1));
-                    updateContractorReport();
-                }
-            });
-
-            $("#managersContractorReport").change(function () {
-                updateContractorReport();
-            });
-
-            $("#contractorReportFromDate").focus(function () {
-                $(".ui-datepicker-calendar").hide();
-                $("#ui-datepicker-div").position({
-                    my: "center top",
-                    at: "center bottom",
-                    of: $(this)
-                });
-            });
-
-            $("#contractorReportToDate").focus(function () {
-                $(".ui-datepicker-calendar").hide();
-                $("#ui-datepicker-div").position({
-                    my: "center top",
-                    at: "center bottom",
-                    of: $(this)
-                });
-            });
-
-
-
             function getMonthYear(datepicker, defaultMonth) {
                 var fromDate = datepicker.val();
                 var fromDateM = {};
@@ -321,100 +228,66 @@
                 return fromDateM;
             }
 
-            function updateMonthReport() {
-                var fromDateM = getMonthYear($("#monthReportFromDate"));
+            $("#dataDeletionFromDate").datepicker({
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                dateFormat: 'mm.yy',
+                defaultDate: new Date((new Date()).getFullYear(), 0, 1),
+                onClose: function (dateText, inst) {
+                    var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                    var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                    $(this).val($.datepicker.formatDate('mm.yy', new Date(year, month, 1)));
 
-                var postData = {
-                    monthNumber: fromDateM.Month,
-                    yearNumber: fromDateM.Year,
-                    employeeId: $("#employeesMonthReport").val() * 1
-                };
+                    updateHalfYearReport();
+                }
+            });
 
-                $.ajax({
-                    type: 'post',
-                    url: '@Url.Action("GetMonthReport")',
-                    data: JSON.stringify(postData),
-                    contentType: "application/json; charset=utf-8",
-                    traditional: true,
-                    success: function (data) {
-                        //  if (!data.IsError) {
-                        // console.log(data);
-                        // jsrender table
-                        if (data.Periods.length > 0) {
-                            data.PeriodFlag = 0;
-                            createReportTable(data, $('#monthReportContainer'));
-                        }
-                        else
-                            $('#monthReportContainer').html('Нет данных');
-                        //}
-                        return false;
-                    }
+            $("#dataDeletionToDate").datepicker({
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                dateFormat: 'mm.yy',
+                defaultDate: new Date(),
+                onClose: function (dateText, inst) {
+                    var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+                    var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+                    $(this).val($.datepicker.formatDate('mm.yy', new Date(year, month, 1)));
+                    //$(this).datepicker('setDate', new Date(year, month, 1));
+                    updateHalfYearReport();
+                }
+            });
+
+            $("#dataDeletionFromDate").focus(function () {
+                $(".ui-datepicker-calendar").hide();
+                $("#ui-datepicker-div").position({
+                    my: "center top",
+                    at: "center bottom",
+                    of: $(this)
                 });
-            }
+            });
 
-            function updateHalfYearReport() {
-                var fromDateM = getMonthYear($("#halfYearReportFromDate"), 1);
-                var toDateM = getMonthYear($("#halfYearReportToDate"));
-
-                var postData = {
-                    monthFromNumber: fromDateM.Month,
-                    yearFromNumber: fromDateM.Year,
-                    monthToNumber: toDateM.Month,
-                    yearToNumber: toDateM.Year,
-                    employeeId: $("#employeesHalfYearReport").val() * 1
-                };
-
-                $.ajax({
-                    type: 'post',
-                    url: '@Url.Action("GetHalfYearReport")',
-                    data: JSON.stringify(postData),
-                    contentType: "application/json; charset=utf-8",
-                    traditional: true,
-                    success: function (data) {
-                        if (data.Periods.length > 0) {
-                            data.PeriodFlag = 1;
-                            createReportTable(data, $('#halfYearReportContainer'));
-                        }
-                        else
-                            $('#halfYearReportContainer').html('Нет данных');
-                        return false;
-                    }
+            $("#dataDeletionToDate").focus(function () {
+                $(".ui-datepicker-calendar").hide();
+                $("#ui-datepicker-div").position({
+                    my: "center top",
+                    at: "center bottom",
+                    of: $(this)
                 });
-            }
+            });
 
-            function updateContractorReport() {
-                var fromDateM = getMonthYear($("#contractorReportFromDate"), 1);
-                var toDateM = getMonthYear($("#contractorReportToDate"));
-
-                var postData = {
-                    monthFromNumber: fromDateM.Month,
-                    yearFromNumber: fromDateM.Year,
-                    monthToNumber: toDateM.Month,
-                    yearToNumber: toDateM.Year,
-                    managerId: $("#managersContractorReport").val() * 1,
-                };
-
-                $.ajax({
-                    type: 'post',
-                    url: '@Url.Action("GetReportByContractor")',
-                    data: JSON.stringify(postData),
-                    contentType: "application/json; charset=utf-8",
-                    traditional: true,
-                    success: function (data) {
-                        if (data.Clients.length > 0) {
-                            // attach periods to data object
-                            // yyyy-MM-dd
-                            //
-                            data.SelectedPeriodFrom = fromDateM.Year + '-' + ("0" + fromDateM.Month).slice(-2) + '-01';
-                            data.SelectedPeriodTo = toDateM.Year + '-' + ("0" + toDateM.Month).slice(-2) + '-01';
-
-                            createContractorReportTable(data, $('#contractorReportContainer'));
-                        }
-                        else
-                            $('#contractorReportContainer').html('Нет данных');
-                        return false;
+            $('#fileupload').fileupload({
+                dataType: 'json',
+                url: '/Administration/DbUpload',
+                done: function (e, data) {
+                    //console.log(data.result);
+                    if (data.result.error > 0) {
+                        alert(data.result.message);
                     }
-                });
-            }
+                    else {
+                      getBackupFiles();
+                    }
+                }
+            });
         });
     </script>
