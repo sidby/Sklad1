@@ -1,4 +1,5 @@
 ﻿using log4net;
+using SidBy.Common.Crypt;
 using SidBy.Sklad.DataAccess;
 using SidBy.Sklad.Web.Models;
 using System;
@@ -48,7 +49,7 @@ namespace SidBy.Sklad.Web.Controllers
         {
             string path = Path.Combine(Server.MapPath("~"), ConfigurationManager.AppSettings["BackupFolder"]);
             string filePath = Path.Combine(path, filename);
-            BackupDB("-before-restore");
+            BackupDB("-" + RandomGenerator.GenerateRandomText(5));
 
             var connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
             System.Data.SqlClient.SqlConnectionStringBuilder builder = new System.Data.SqlClient.SqlConnectionStringBuilder(connectionString);
@@ -64,7 +65,7 @@ namespace SidBy.Sklad.Web.Controllers
           int monthFromNumber, int yearFromNumber,
           int monthToNumber, int yearToNumber)
         {
-            BackupDB(Session.LCID.ToString());
+            BackupDB("-" + RandomGenerator.GenerateRandomText(5));
 
             var service = new DataBulkOperationsService(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString);
             service.DeleteDocumentsByPeriod(monthFromNumber,  yearFromNumber, monthToNumber,  yearToNumber);
